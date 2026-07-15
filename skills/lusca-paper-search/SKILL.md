@@ -5,7 +5,7 @@ description: >-
   DeepXiv/Sciverse 八大开源 API + 模型自身知识，覆盖英文 CS/理工与顶会
   (NeurIPS/ICLR/ICML)。用户提到搜论文、查文献、找 related work、prior art、
   近 X 年某主题发表时使用本技能。
-version: "1.0.1"
+version: "2.0.0"
 user-invocable: true
 argument-hint: "[可选：检索主题 / 年份范围 / 指定来源]"
 allowed-tools: Read, Write, Bash, WebSearch
@@ -17,8 +17,8 @@ allowed-tools: Read, Write, Bash, WebSearch
 
 通过 `${SKILL_DIR}/scripts/search_papers.py` 在 **arXiv / DBLP / OpenAlex /
 OpenReview（NeurIPS/ICLR/ICML）/ Semantic Scholar / Crossref / DeepXiv /
-Sciverse** 八大开源 API 之间**并发**检索，并辅以模型自身知识源。结果按来源分组，
-全部展示后再给综合摘要。
+Sciverse** 八大开源 API 之间**并发**检索。脚本把结果**合并成一张表**（完整索引，
+纯数据、脚本直出）；AI 据此产出**研究导览**（发展脉络 / 研究热点 / 推荐阅读）。
 
 ## 路径约定
 
@@ -119,73 +119,94 @@ python "$SEARCH" \
 
 ## 输出 schema
 
-`search_papers()` 返回 dict，来源名 → 论文 dict 列表：
+`search_papers()` 返回**扁平 `list[dict]`**，跨源去重后按 source 规范顺序、组内
+`publication_date` 降序排列。每条 paper：
 
 ```
 {
-  "arxiv": [
-    {
-      "title": str,
-      "authors": [str, ...],
-      "year": int,
-      "abstract": str,
-      "url": str,
-      "venue": str,
-      "citation_count": int,
-      "publication_date": str,
-      "source": str
-    }, ...
-  ],
-  "semantic_scholar": [...],
-  ...
+  "title": str,
+  "authors": [str, ...],
+  "year": int,
+  "abstract": str,
+  "url": str,
+  "venue": str,
+  "citation_count": int,
+  "publication_date": str,
+  "source": str,                 # 主来源（信息最全那条的原 source）
+  "sources": [str, ...],        # 跨源去重后所有命中来源（含主来源）
+  "code_links": [str, ...]      # 从摘要提取的 GitHub / HuggingFace / 项目页链接
 }
 ```
 
-CLI 按来源分组打印，并附每源论文数汇总。
+CLI 一次输出两段（AI 一次拿全）：
+
+- `===DATA===`：上述扁平 JSON 数组，**含完整 abstract / citation_count** → 供 AI 读做导览分析。
+- `===TABLE===`：合并 markdown 表格（7 列）→ 供 AI 原样贴报告。
+- 末行：`Total: <M> unique papers (<H> hits before dedup) from <K> sources.`
+
+两段顺序一致：`===DATA===` 第 i 条 ≡ `===TABLE===` 第 i+1 行 → 导览用 `[序号]` 引用表格、序号稳定。
+
+---
+
+## 去重与链接提取（脚本自动）
+
+聚合器在返回前对全部来源做两道自动处理，LLM 无需手工干预：
+
+1. **跨源标题去重**：标题归一化（小写、去标点、压缩空白）后相同者合并为一条，
+   **保留信息最全的版本**（按字段完整度加权：摘要 3、URL 2、其余元数据各 1；
+   `citation_count=0` 视为有效字段）。合并后的记录在其主来源下展示，并以 `sources`
+   字段记录所有命中来源。无标题的论文不参与去重，原样保留。
+   - **仅合并标题相同的跨源重复项，不按分数删除任何论文**（见 §重要约定）。
+2. **代码 / 项目链接提取**：对保留的每条记录，从摘要中正则抽取 GitHub、HuggingFace、
+   GitLab、Bitbucket 等链接，存入 `code_links`，供 Step 1 的 Code/Resources 列展示。
+
+> 这两步由 `search_papers.py` 完成；**语义相关度评分与技术脉络分析**是 LLM 的工作（见下文），不进脚本。
 
 ---
 
 ## 输出给用户
 
-检索完成后，**展示每个来源的每一篇论文**，顺序为：
-Semantic Scholar、OpenAlex、arXiv、OpenReview、Crossref、DBLP、Model Knowledge。
-随后给出综合摘要。
+检索完成后，输出顺序为：**研究导览（AI 分析）先行 → 完整索引（脚本直出）附后 →
+model_knowledge 附录**。认知先行，完整索引保证不漏召回。
 
 **为何要完整召回**：调用本技能的用户在做文献综述、related-work 调研或 prior-art 核查。
-价值来自看到完整命中集——漏掉一篇可能意味着漏掉一条引用或一次重复研究。摘要用来**补充**
-完整表格，而非替代；不要"为节省篇幅"把结果折叠成摘要。用户能自己略读，但无法找回从未展示的论文。
+价值来自看到完整命中集——漏掉一篇可能意味着漏掉一条引用或一次重复研究。导览用来**补充**
+完整索引，而非替代；不要"为节省篇幅"把索引折叠。用户能自己略读，但无法找回从未展示的论文。
 
-### Step 1：展示每个来源的全部结果
+### 第一步：跑脚本，拿 DATA + TABLE
 
-**每个来源**用一张 **markdown 表格**展示全部论文，含标题、日期、会议、引用数。
-每个来源单列一节，例如：
-
-```
-### arXiv (N papers)
-
-| #   | Title       | Date    | Venue   | Citations |
-|-----|-------------|---------|---------|-----------|
-| [1](paper url) | Title here | 2024-03 | NeurIPS | 42 |
-| [2](paper url) | Title here | 2023-11 | ICLR    | 10 |
+```bash
+python "$SEARCH" --query "<QUERY>" --start-year <YYYY> --end-year <YYYY> --max-papers 10
 ```
 
-某来源返回 0 结果时，**显式标注**（如"### OpenReview (0 papers) — 本窗口内无匹配"）。
-检索过程出错时，脚本会把错误打到 stderr——**原样上报给用户，绝不隐瞒**。
+输出含 `===DATA===`（JSON）与 `===TABLE===`（markdown 表）。**TABLE 原样采用**，不重排、
+不分析、不打分。索引表字段：
 
-### Step 2：全部结果的综合摘要
+| # | Title | Author | Date | Venue | Code/Resource | Source |
+|---|-------|--------|------|-------|---------------|--------|
 
-展示完所有论文后，给出**综合摘要**，按以下**固定顺序**的七节：
+- **#**：全局连续序号（与 DATA 下标 +1 一致）。
+- **Title**：论文 URL 的可点击链接；无 URL 时纯文本。
+- **Author**：≤3 人全列；>3 人列前 3 加 `et al.`。
+- **Date**：`YYYY-MM`；无则 `year`；再无则 `—`。
+- **Code/Resource**：取自 `code_links`（GitHub→`[code]`、HuggingFace→`[model]`）；无则 `—`。
+- **Source**：所有命中来源，主来源在前，逗号分隔。
 
-1. **Overview**：所用 query、年份范围、命中总数。一两句话框定语料覆盖范围。
-2. **Trends**：时间分布（如"2024 年关注度激增"）、主导会议、方法演进、反复出现的作者群/实验室。
-3. **Key themes**：跨全部结果的 3–6 个主要研究主题/聚类，每个配一行描述与 2–3 个代表论文编号。
-4. **Keywords frequency**：从标题/摘要抽取的最高频技术术语/概念表，含计数，格式 `| Keyword | Count |`，取前 5。
-5. **Most cited by accepted paper**：跨全部来源被引最高的 5 篇 accepted 论文，按引用数排序，格式 `| Rank | Title | Year | Citations |`。
-6. **Most cited by first author**：按本结果集内累计引用数排名前 5 的第一作者，格式
-   `| Rank | Author | Papers in set | Total citations |`。**Author 列只填姓名**（如 `Jane Doe`），
-   不得附加论文标题、单位、会议等任何其它信息——论文数与引用总数各有其列。
-7. **Recommendations for reading**：与用户原始 query 最相关、最有影响力的 3–5 篇，按阅读路径排序
-   （奠基 → 最新），每篇配一行理由。
+某来源检索出错：脚本把错误打到 stderr——**原样上报，绝不隐瞒**。
+
+### 第二步：研究导览（AI 分析，认知先行）
+
+读完 `===DATA===` 后，按**固定顺序**写三节。所有论文引用用索引表 `[序号]`。
+
+1. **技术发展脉络**：用 mermaid `flowchart TD`，节点为关键论文/方法（标 `[序号]`），边为
+   演进关系，按时间自上而下分层（奠基在上、新兴在下）。图下附三五句：起点（奠基工作）→
+   关键转折 → 当前主流 → 新兴方向；点出主导会议与引用量级随时间的变化。**克制，不展开单篇**
+   （深度精读是 `lusca-paper-read` 的事）。
+2. **研究热点**：跨全部命中聚类 3–6 主题，每行 `Theme | 一行描述 | 代表论文[序号] | 趋势(↑→↓)
+   | counts(该主题论文数)`。判定参考聚类内论文数、`citation_count` 与时间分布。
+3. **推荐阅读**：与用户原始 query 最相关、最有影响力的 3–5 篇，按奠基 → 最新排序，每篇
+   `[序号] 标题 —— 一行理由`。理由结合语义相关度、`citation_count`、会议声望——**这是评分
+   判断的归宿**，不再单列分数列。
 
 ---
 
@@ -220,19 +241,19 @@ CLI 跑完后：
 
 ### 展示格式
 
-用与其它来源相同的表格布局，但 URL 列可链接到检索查询（如 arXiv 或 Google Scholar 检索）
-而非规范论文 URL，因为无经验证链接：
+model_knowledge **不进索引表**（无 JSON、无脚本介入）。CLI 跑完后，AI 把回忆到的论文作为
+报告末尾的**附录**列出，与 API 索引表分离：
 
 ```
-### Model Knowledge (N papers, may include uncertain entries)
+## 附录：model_knowledge 补充候选（N papers，可能含 uncertain 条目）
 
-| #   | Title       | Year | Venue   | Notes |
-|-----|-------------|------|---------|-------|
-| [1](https://scholar.google.com/scholar?q=Title) | Title here | 2018 | NeurIPS | 奠基性；常被近期 X 工作引用 |
-| [2](...) | Title here | 2024 | ICLR | (uncertain — verify) |
+| Title | 主要作者 | Year | Venue | 一行相关性理由 |
+|-------|---------|------|-------|---------------|
+| [Title](https://scholar.google.com/scholar?q=Title) | Jane Doe | 2018 | NeurIPS | 奠基性；常被近期 X 工作引用 |
+| [Title](...) | .. | 2024 | ICLR | (uncertain — verify) |
 ```
 
-用"Notes"列替代"Citations"列，因为无法从记忆给出可靠引用数。
+标题可链接到检索查询（Google Scholar / arXiv 检索）而非规范 URL，因为无经验证链接。
 
 ---
 
@@ -263,13 +284,17 @@ python "$SEARCH" \
 
 ## 重要约定
 
-- **落盘检索报告。** 完成检索后，写一份 markdown 文件到
+- **落盘检索报告。** 完成检索后，按 `assets/report-template.md` 的模板写一份 markdown 文件到
   `./outputs/lusca-paper-search/{YYYYMMDDHHmmss}_{slug}.md`。
-  - 内容：完整的 **"Step 1：展示每个来源的全部结果"** 表格，紧接 **"Step 2：综合摘要"**，
-    顺序如此，**不截断**。
-- **完整报告同步内联展示。** 把完整详细报告内联返回——每篇论文、每张表，外加分析与推理。
-  绝不把表格折叠成摘要，绝不"为省篇幅"缩写结果。
-- **绝不追问确认。** 全部输入自动推断（见"输入"节）。首轮即跑。
+  - **顶部必须有 frontmatter**：至少含 `title`、`query`、`sources`、`year_range`、`total_hits`
+    （去重前，取 CLI 末行 `H`）、`unique_papers`（去重后，取 `M`）、`generated_at`、
+    `generator`（本技能名与版本）。
+  - 正文顺序：**研究导览（三节）→ 完整索引（脚本 TABLE 原样）→ model_knowledge 附录**，不截断。
+- **表格纯数据。** 索引表 = 脚本 `===TABLE===` 原样采用，AI 不重排、不打分、不增删列。
+  打分/聚类/脉络判断**只在导览里**出现。
+- **完整报告同步内联展示。** 把完整报告内联返回——导览三节 + 完整索引表 + 附录，绝不折叠。
+- **去重 ≠ 删除。** 脚本跨源去重只合并标题相同的重复条目（保留信息最全的），不丢弃任何论文。
+- **绝不追问确认。** 全部输入自动推断（见「输入」节）。首轮即跑。
 - **错误原样上报。** 某来源失败时，把 stderr 消息如实报给用户，而非隐瞒或盲目重试。
 
 ---
@@ -280,6 +305,7 @@ python "$SEARCH" \
 |------|-----------|
 | `references/sources.md` | 需要了解各 API 源依赖、Token 要求、失败模式时 |
 | `references/programmatic_api.md` | 需要直接调用 `search_papers()` 函数、消费结构化 dict 时 |
+| `assets/report-template.md` | 落盘检索报告时，复制为本次报告骨架（含 frontmatter） |
 
 ---
 

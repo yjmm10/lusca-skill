@@ -86,40 +86,63 @@ def search_papers_by_sciverse(
             "Add it to your .env (see .env.template)."
         )
 
+    # NOTE: /meta-search 不接受 year_from/year_to（服务端返回 400 extra_forbidden）；
+    # 年份过滤改为客户端按 publication_published_year 执行。
     payload: dict = {
         "collection": "papers",
         "query": query,
         "page_size": min(50, max(1, int(max_results))),
     }
-    if start_year:
-        payload["year_from"] = int(start_year)
-    if end_year:
-        payload["year_to"] = int(end_year)
 
     data = _http_post_json(f"{API_BASE}/meta-search", payload, token)
-    # Response shape: {"hits": [ {title, doc_id, authors, year, venue, abstract}, ... ]}
-    hits = data.get("hits") if isinstance(data, dict) else None
-    if hits is None:
-        hits = data if isinstance(data, list) else []
+    # Response shape: {"results": [ {title, author:[{name}], publication_published_year,
+    #   abstract, locations:[{url}], citation_count, doc_id, publication_venue_name_unified}, ... ]}
+    results = data.get("results") if isinstance(data, dict) else None
+    if results is None:
+        results = data if isinstance(data, list) else []
 
     papers: list[dict] = []
-    for h in hits:
+    for h in results:
         if not isinstance(h, dict):
             continue
         title = h.get("title", "")
-        authors = h.get("authors", []) or []
-        if not isinstance(authors, list):
-            authors = [str(authors)]
+        # author 是 [{orcid, name}, ...]，提取 name
+        raw_authors = h.get("author", []) or []
+        if isinstance(raw_authors, list):
+            authors = [str(a.get("name", "")) if isinstance(a, dict) else str(a) for a in raw_authors]
         else:
-            authors = [str(a) for a in authors]
+            authors = [str(raw_authors)]
+        year = h.get("publication_published_year")
+        # 客户端年份过滤（服务端不支持 year_from/year_to）
+        if year is not None:
+            try:
+                yi = int(year)
+                if start_year and yi < int(start_year):
+                    continue
+                if end_year and yi > int(end_year):
+                    continue
+            except (TypeError, ValueError):
+                pass
+        # URL: 优先 locations[0].url，其次 access_oa_url，再次 doi
+        url = ""
+        locs = h.get("locations") or []
+        if isinstance(locs, list) and locs and isinstance(locs[0], dict):
+            url = locs[0].get("url", "") or ""
+        if not url:
+            url = h.get("access_oa_url", "") or ""
+        if not url and h.get("doi"):
+            url = "https://doi.org/" + str(h["doi"])
+        if not url:
+            url = _fallback_url(title)
+        venue = h.get("publication_venue_name_unified", "") or h.get("publication_venue_type", "") or ""
         papers.append({
             "title": title,
             "authors": authors,
-            "year": h.get("year"),
+            "year": int(year) if year is not None else None,
             "abstract": h.get("abstract", "") or "",
-            "url": h.get("url") or _fallback_url(title),
-            "venue": h.get("venue", "") or "",
-            "citation_count": 0,
+            "url": url,
+            "venue": venue,
+            "citation_count": int(h.get("citation_count", 0) or 0),
             "publication_date": "",
             "source": "sciverse",
             "doc_id": h.get("doc_id", ""),

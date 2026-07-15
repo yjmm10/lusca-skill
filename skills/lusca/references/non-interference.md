@@ -56,4 +56,4 @@ lusca 是**可选·事后·不占用·不干扰**的附加反省层（见 `SKILL
 
 ## 边界：何时"误触发"可转为 reflex
 
-纯任务型误触发（如场景 1）只让位、不建 reflex。但若用户在误触发后**补充了真实的 skill 设计观察**（如"我希望 lusca 能边做任务边收集"），则不再是"单纯误触发"——这是对 skill 定位的反馈，走关联判定（`references/skill-linkage.md`）后可反省（参见 `docs/reflex/reflex_20260714090842_lusca-nonblocking-collection`）。
+纯任务型误触发（如场景 1）只让位、不建 reflex。但若用户在误触发后**补充了真实的 skill 设计观察**（如"我希望 lusca 能边做任务边收集"），则不再是"单纯误触发"——这是对 skill 定位的反馈，走关联判定（`references/skill-linkage.md`）后可反省（参见 `./outputs/lusca/reflex_20260714090842_lusca-nonblocking-collection`）。

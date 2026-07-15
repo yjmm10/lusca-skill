@@ -1,15 +1,14 @@
 # Programmatic API
 
-Most use cases are best served by the CLI in `scripts/search_papers.py`. Reach
-for the function-call interface only when you need something the CLI doesn't
-expose — e.g. consuming the structured dict directly without re-parsing CLI
-output.
+Most use cases are best served by the CLI in `scripts/search_papers.py` (which
+prints a `===DATA===` JSON block plus a `===TABLE===` markdown block). Reach for
+the function-call interface only when you need to consume the structured list
+directly.
 
 ```bash
 cd scripts && python -c "
-import json, sys
 from search_papers import search_papers
-res = search_papers(
+papers = search_papers(
     query='<QUERY>',
     start_year=2024,
     end_year=2026,
@@ -17,11 +16,19 @@ res = search_papers(
     sources=['semantic_scholar', 'open_alex', 'arxiv', 'openreview'],
     parallel=True,
 )
-for source, papers in res.items():
-    print(f'{source}: {len(papers)} papers')
-    for p in papers:
-        print(f'  - {p[\"title\"]} ({p[\"year\"]})')
+print(len(papers), 'papers')
+for p in papers:
+    print(f'  - {p[\"title\"]} ({p[\"year\"]})')
 "
 ```
 
-Return shape: see "Output schema" in `SKILL.md`.
+`search_papers()` returns a **flat `list[dict]`**: cross-source deduped and
+ordered by source canonical order, then by `publication_date` descending within
+each source. Each paper dict contains: `title`, `authors`, `year`, `abstract`,
+`url`, `venue`, `citation_count`, `publication_date`, `source`, `sources`
+(all sources that matched this paper), `code_links` (GitHub/HuggingFace/etc.
+extracted from the abstract).
+
+For the pre-dedup hit count and number of sources with hits, use the internal
+`_search_and_aggregate(...)` which returns `(flat_papers, total_before_dedup,
+k_sources_with_hits)`.

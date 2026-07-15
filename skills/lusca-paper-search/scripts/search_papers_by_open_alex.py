@@ -26,28 +26,46 @@ def search_papers_by_open_alex(
         List of paper dictionaries.
     """
     API_KEY = os.environ.get("OPENALEX_API_KEY", "")
+    mailto = os.environ.get("OPENALEX_MAILTO", "")  # polite pool → 10 req/s（非认证，仅友好标识）
     url = "https://api.openalex.org/works"
     papers: list[dict] = []
     page = 1
     per_page = min(200, max_results)  # API max per request is 200
 
     while len(papers) < max_results:
+        # 用 `search`（关键词）而非 `search.semantic`（语义）：后者常 504 超时（30s 无响应）。
         params = {
-            "search.semantic": query,
+            "search": query,
             "filter": f"publication_year:{start_year}-{end_year}",
             "sort": "relevance_score:desc",
             "page": page,
             "per-page": per_page,
-            #"mailto": "your_email@example.com",  # OpenAlex polite pool
         }
+        if mailto:
+            params["mailto"] = mailto
         headers = {"Authorization": f"Bearer {API_KEY}"} if API_KEY else {}
 
-        response = requests.get(url, params=params, headers=headers)
+        try:
+            response = requests.get(url, params=params, headers=headers, timeout=30)
+        except requests.exceptions.Timeout:
+            print("OpenAlex timed out; retrying once with longer timeout...")
+            time.sleep(2)
+            try:
+                response = requests.get(url, params=params, headers=headers, timeout=45)
+            except requests.exceptions.RequestException:
+                break
 
         if response.status_code == 429:
             print("Rate limited. Waiting 3 seconds...")
             time.sleep(3)
             continue
+        if response.status_code >= 500:
+            print(f"OpenAlex server error {response.status_code}; retrying once...")
+            time.sleep(3)
+            try:
+                response = requests.get(url, params=params, headers=headers, timeout=45)
+            except requests.exceptions.RequestException:
+                break
 
         response.raise_for_status()
         data = response.json()
@@ -70,7 +88,7 @@ def search_papers_by_open_alex(
                 "venue": (work.get("primary_location", {}).get("source") or {}).get("display_name", ""),
                 "citation_count": work.get("cited_by_count", 0),
                 "publication_date": work.get("publication_date", ""),
-                "source": "openalex",
+                "source": "open_alex",
             })
 
         page += 1

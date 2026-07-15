@@ -26,9 +26,43 @@ def search_papers_by_dblp(
         List of paper dictionaries.
     """
     url = "https://dblp.org/search/publ/api"
+    limit = min(1000, max_results)  # DBLP max per request is 1000
+
+    # DBLP 对长/带连字符的 query 易 0 命中（如 "training-free document understanding"→0，
+    # 但 "document understanding"→745）。准备回退 query 列表：原 query → 去首词 → 末两词，
+    # 首个有命中者即用。
+    words = query.split()
+    query_candidates = [query]
+    if len(words) > 2:
+        query_candidates.append(" ".join(words[1:]))
+    if len(words) > 3:
+        query_candidates.append(" ".join(words[-2:]))
+
+    papers: list[dict] = []
+    for q in query_candidates:
+        papers = _dblp_query_once(q, url, start_year, end_year, max_results, limit)
+        if papers:
+            break
+        if len(query_candidates) > 1:
+            print(f"DBLP: query {q!r} 无命中，尝试回退 query...")
+
+    # Fetch abstracts for papers that have a DOI
+    papers = papers[:max_results]
+    for paper in papers:
+        abstract = _fetch_abstract_from_doi(paper.get("url", ""))
+        if abstract:
+            paper["abstract"] = abstract
+        time.sleep(0.5)  # Be polite to the Crossref API
+
+    return papers
+
+
+def _dblp_query_once(
+    query: str, url: str, start_year: int, end_year: int, max_results: int, limit: int,
+) -> list[dict]:
+    """对单个 query 执行 DBLP 搜索（分页 + 年份过滤）。无命中返回空列表。"""
     papers: list[dict] = []
     offset = 0
-    limit = min(1000, max_results)  # DBLP max per request is 1000
 
     while len(papers) < max_results:
         params = {
@@ -38,7 +72,15 @@ def search_papers_by_dblp(
             "f": offset,
         }
 
-        response = requests.get(url, params=params)
+        try:
+            response = requests.get(url, params=params, timeout=30)
+        except requests.exceptions.Timeout:
+            print("DBLP timed out; retrying once...")
+            time.sleep(2)
+            try:
+                response = requests.get(url, params=params, timeout=45)
+            except requests.exceptions.RequestException:
+                break
 
         if response.status_code == 429:
             print("Rate limited. Waiting 3 seconds...")
@@ -87,14 +129,6 @@ def search_papers_by_dblp(
             break
 
         time.sleep(1)  # Be polite to the API
-
-    # Fetch abstracts for papers that have a DOI
-    papers = papers[:max_results]
-    for paper in papers:
-        abstract = _fetch_abstract_from_doi(paper.get("url", ""))
-        if abstract:
-            paper["abstract"] = abstract
-        time.sleep(0.5)  # Be polite to the Crossref API
 
     return papers
 

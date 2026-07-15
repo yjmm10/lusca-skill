@@ -1,8 +1,8 @@
 ---
 name: lusca
 description: >-
-  反省元技能（可选·事后触发）：在其他任务完成后，对本会话中出现的、与所涉 skill 强相关的问题做多维度分析，输出"问题 + 改进建议"清单，按会话归档到 docs/reflex/，一个 session 一份文档。不占用其他 skill 的功能、不接管任务型输入；只记录与分析，绝不自动改动任何 skill；改进建议需用户确认后由对应维护流程执行。用户提到"反省本 session""复盘刚才 skill 用得不对的地方""记录这次的问题与改法""lusca""reflex"时使用本技能。
-version: "1.2.0"
+  反省元技能（可选·事后触发）：在其他任务完成后，对本会话中出现的、与所涉 skill 强相关的问题做多维度分析，输出"问题 + 改进建议"清单，按会话归档到 ./outputs/lusca/，一个 session 一份文档。不占用其他 skill 的功能、不接管任务型输入；只记录与分析，绝不自动改动任何 skill；改进建议需用户确认后由对应维护流程执行。用户提到"反省本 session""复盘刚才 skill 用得不对的地方""记录这次的问题与改法""lusca""reflex"时使用本技能。
+version: "1.4.0"
 user-invocable: true
 argument-hint: "[可选：session 主题 / 涉及的 skill 名 / 问题简述]"
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash
@@ -14,7 +14,7 @@ allowed-tools: Read, Write, Edit, Grep, Glob, Bash
 
 本技能是**元技能**：不生产论文/专利/代码，只**复盘本会话中与 skill 相关的问题**，做多维度归因，产出可执行的改进建议并归档。**只读、只建议、不擅改**——所有对 skill 文件的改动必须经用户确认。
 
-**定位原则**：lusca 是**可选**的附加反省层——**事后**触发（在其他任务完成后才反省）、**不占用**其他 skill 的功能、**不接管**任务型输入、与其他 skill 同会话使用时**不干扰**它们的执行。当传入的参数是其他 skill 的任务型输入（如检索主题、待润色文本、待读论文）时，lusca 不接管该任务，简短说明自身作用域后让位给对应 skill（正反例见 `references/non-interference.md`）。
+**定位原则**：lusca 是**可选**的附加反省层——**事后**触发（在其他任务完成后才反省）、**不占用**其他 skill 的功能、**不接管**任务型输入、与其他 skill 同会话使用时**不干扰**它们的执行。当传入的参数是其他 skill 的任务型输入（如检索主题、待润色文本、待读论文）时，lusca 不接管该任务，简短说明自身作用域后让位给对应 skill（正反例见 `references/non-interference.md`）。**无感执行**：触发后静默完成读取/判定/分析/归档，不在对话中输出中间步骤；仅最终一次交付。
 
 ## 定位与分工
 
@@ -28,16 +28,18 @@ allowed-tools: Read, Write, Edit, Grep, Glob, Bash
 | **复盘本次会话中 skill 暴露的问题、记录改法** | **本技能（lusca）** |
 | 真正去改某个 skill 的文件 | 对应 skill 维护流程（经 lusca 确认后） |
 
-lusca 的产出是仓库根 `docs/reflex/` 下的归档文档；它**不**触碰 `skills/` 下任何 skill 源。lusca 是**可选**附加层：不替代、不抢占上表任何 skill；仅在所有任务完成后按用户要求做一次额外反省，与其他 skill 同会话使用时不干扰它们的执行。
+lusca 的产出是 `./outputs/lusca/` 下的归档文档；它**不**触碰 `skills/` 下任何 skill 源。lusca 是**可选**附加层：不替代、不抢占上表任何 skill；仅在所有任务完成后按用户要求做一次额外反省，与其他 skill 同会话使用时不干扰它们的执行。
 
 ---
 
 ## 触发条件
 
+lusca 仅在用户**明确请求反省**时触发，不因随口提及问题而自动打断任务：
+
+- 斜杠指令：`/lusca`、`/反省`
 - 明确提及：反省、复盘、反思本会话、记录刚才的问题、lusca、reflex
 - 英文：reflect on this session, post-mortem the skill issue, log the skill problem
-- 斜杠指令：`/lusca`、`/反省`
-- 隐式：用户指出"刚才 XX skill 这里处理得不对/漏了/误触发了"，并希望沉淀
+- 隐式（仅当用户**明确要求记录/沉淀**时）：如"帮我记一下刚才 XX skill 的这个问题"——仅随口抱怨/提及问题、未要求记录时**不触发**
 
 **不触发 / 拒绝记录**（见 §关联判定护栏）：
 - 问题与任何 skill 无关（纯业务问题、外部工具故障、用户操作失误）→ 告知超出范围，不归档
@@ -49,15 +51,17 @@ lusca 的产出是仓库根 `docs/reflex/` 下的归档文档；它**不**触碰
 ## 主流程
 
 ```
-intake → (skill-linkage 判定) → analyze → record
+intake → (skill-linkage 判定) → analyze → record → 一次交付
 ```
 
-1. **`Read`** `prompts/intake.md` → 界定**会话范围**与**候选问题**；识别涉及的 skill
+**无感执行**：Step 1–5 静默完成——依次 `Read` 各 prompt/reference，做 intake → 关联判定 → 六维分析 → 写入归档。**中间不单独输出** intake 确认、关联判定过程；六维分析直接写进 reflex 文档，随 reflex 内联展示（不作为独立中间产物）。不铺垫"现在执行 X"、不复述正在做什么。
+
+1. **`Read`** `prompts/intake.md` → 界定**会话范围**与**候选问题**；识别涉及的 skill（内部完成，不输出确认）
 2. **`Read`** `references/skill-linkage.md` → 对每个候选问题做**关联判定**：剔除与 skill 无关者
 3. **`Read`** `prompts/analyze.md` + `references/dimensions.md` → 对留存问题做**六维分析**
 4. **`Read`** `prompts/record.md` + `references/template-guide.md` → 按模板填写并写入归档
 5. **`Read`** `assets/reflex-template.md` → 复制为本次会话的 reflex 文档
-6. 交付：归档路径 + 待确认的改进建议清单（**不执行任何 skill 改动**）
+6. **一次交付**：落盘 reflex 到 `./outputs/lusca/` + 完整内联展示 + 声明（见 §交付格式）
 
 ---
 
@@ -79,7 +83,8 @@ intake → (skill-linkage 判定) → analyze → record
 本工作区采用**单一源**（见 `docs/superpowers/specs/2026-07-14-lusca-skill-workspace-design.md` 方案 A）：skill 源只在 `skills/<name>/`。lusca **严禁**修改任何 skill 源：
 
 - ❌ `Edit`/`Write` 到 `skills/**`（任何 skill 的 SKILL.md、prompts、references、scripts、assets）
-- ✅ `Write`/`Edit` 仅限仓库根的 `docs/reflex/**`（归档文档）
+- ❌ `Write` 到 `docs/**`（reflex 不入库）
+- ✅ `Write`/`Edit` 仅限 `./outputs/lusca/**`（归档文档，gitignored）
 - ✅ `Read`/`Grep`/`Glob` 可读 `skills/**` 用于归因分析
 
 改进建议以**「待确认」**状态写入 reflex 文档的确认区；用户确认后，**由用户或对应 skill 维护流程**执行调整（直接编辑 `skills/<name>/` 源、或经 link 脚本同步），lusca 本身不执行。
@@ -88,7 +93,7 @@ intake → (skill-linkage 判定) → analyze → record
 
 ## 输出与存放
 
-- **目录**：仓库根的 `docs/reflex/`（与 `docs/superpowers/` 平级）；用户指定其他路径时从其指定
+- **目录**：`./outputs/lusca/`（gitignored，与 `lusca-paper-search` 输出同级）；用户指定其他路径时从其指定
 - **粒度**：一个 session 一份文档；同一 session 内多个问题汇总到同一份
 - **命名**：`reflex_{YYYYMMDDHHmmss}_{主题slug}.md`
   - 示例：`reflex_20260714143022_paper-polish-code-abstraction.md`
@@ -114,11 +119,11 @@ intake → (skill-linkage 判定) → analyze → record
 
 ## 交付格式
 
-每次交付须包含：
+**一次交付、完整内联**——参考 `lusca-paper-search`：静默完成分析后一次输出，不铺垫流程、不单独输出中间产物（intake 确认/关联判定过程不输出）。每次交付：
 
-1. **reflex 文档路径**：`docs/reflex/reflex_{ts}_{slug}.md`
-2. **待确认改进建议清单**：表格列出 skill / 文件 / 建议 / 类型 / 状态（全部为「待确认」）
-3. **明确声明**：未改动任何 skill 源；待用户确认后再调整
+1. **落盘**：写 reflex 到 `./outputs/lusca/reflex_{ts}_{slug}.md`（gitignored，不入库）
+2. **内联展示**：把完整 reflex（问题清单 + 汇总 + 确认区）内联返回，不折叠、不截断——用户无需开文件即可看到反省结果
+3. **声明**：未改动任何 skill 源；改进建议需用户确认后由维护流程执行
 
 ---
 
@@ -141,7 +146,7 @@ intake → (skill-linkage 判定) → analyze → record
 | Step 1 | `prompts/intake.md` | 界定会话范围、收集候选问题、识别涉及 skill |
 | Step 2 | `references/skill-linkage.md`（规范，非 prompt） | 关联判定，剔除无关问题 |
 | Step 3 | `prompts/analyze.md` | 六维分析执行 |
-| Step 4 | `prompts/record.md` | 按模板填写并写入 docs/reflex |
+| Step 4 | `prompts/record.md` | 按模板填写并写入 ./outputs/lusca |
 
 ---
 

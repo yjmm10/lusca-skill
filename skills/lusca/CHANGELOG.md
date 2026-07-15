@@ -9,6 +9,26 @@
 
 ---
 
+## [1.4.0] — 2026-07-14
+
+### Changed
+- **输出位置迁移**：reflex 归档从 `docs/reflex/` 改到 `./outputs/lusca/`（gitignored，与 `lusca-paper-search` 输出同级）；不再写入 `docs/`。
+- **完整内联展示**：参考 `lusca-paper-search`，落盘后把完整 reflex（问题清单+汇总+确认区）内联返回，不折叠、不截断；用户无需开文件即可看到反省结果。
+- 同步更新 `prompts/record.md`、`references/non-interference.md`、`CLAUDE.md`、`README.md` 路径引用；既有 reflex 文档迁到 `outputs/lusca/`，移除 `docs/reflex/`。
+
+### 来源
+- 用户反馈：reflex 输出参考 lusca-paper-search，不要输出到 docs
+
+## [1.3.0] — 2026-07-14
+
+### Changed
+- **无感执行**：主流程改为静默处理——intake/关联判定/六维分析/归档全在后台，中间不在对话中输出；仅最终一次交付（路径+建议表+声明）。`prompts/intake.md` 去掉"输出确认/确认后进入下一步"的暂停。
+- **触发收窄**：仅在用户**明确请求反省**时触发（斜杠指令/明确关键词/明确要求记录）；随口提及问题、未要求记录时不自动触发，避免打断任务。
+- `SKILL.md` 定位原则补"无感执行"；`交付格式` 强调一次交付、简短。
+
+### 来源
+- `outputs/lusca/reflex_20260714090842_lusca-nonblocking-collection.md` P2（先响应后处理、不友好）
+
 ## [1.2.0] — 2026-07-14
 
 ### Added
@@ -24,7 +44,7 @@
 - `SKILL.md` 新增「定位原则」段；`定位与分工` 补"可选附加层"说明；`触发条件` 增"任务型输入不触发"条目；frontmatter `description` 同步标注"可选·事后触发、不占用其他 skill 功能"。
 
 ### 来源
-- `docs/reflex/reflex_20260714090842_lusca-nonblocking-collection.md`（P1-A 已应用；P1-B 已驳回——不引入任务中 capture 模式，避免干扰其他 skill）
+- `outputs/lusca/reflex_20260714090842_lusca-nonblocking-collection.md`（P1-A 已应用；P1-B 已驳回——不引入任务中 capture 模式，避免干扰其他 skill）
 
 ## [1.0.1] — 2026-07-14
 
