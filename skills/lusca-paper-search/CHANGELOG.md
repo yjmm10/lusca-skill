@@ -2,6 +2,12 @@
 
 本文件记录 lusca-paper-search 的版本演进。版本号规则见 `SKILL.md`「版本管理」。
 
+## [2.0.1] — 2026-07-17
+
+### Added
+- frontmatter 新增 `author: lusca` 字段（项目统一署名，主页 https://github.com/yjmm10）
+- 落盘检索报告新增文末出处块：`assets/report-template.md` 末尾加占位、`SKILL.md`「重要约定」新增条目——作者 / 版本 / 远程出处链接（`https://github.com/yjmm10/lusca-skill/tree/main/skills/lusca-paper-search`），遵 CLAUDE.md「文档输出规范」
+
 ## [2.0.0] — 2026-07-15
 
 Breaking：输出体系从「分来源多表 + 七节摘要」重构为「研究导览 + 完整索引」二段式。

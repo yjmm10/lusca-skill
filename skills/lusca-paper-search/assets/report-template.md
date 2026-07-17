@@ -7,7 +7,7 @@ max_papers_per_source: <N>
 total_hits: <H，去重前，取 CLI 末行>
 unique_papers: <M，去重后，取 CLI 末行>
 generated_at: "<YYYY-MM-DD HH:MM:SS>"
-generator: "lusca-paper-search@2.0.0"
+generator: "lusca-paper-search@2.0.1"
 ---
 
 # 文献检索报告：<QUERY 简述>
@@ -66,3 +66,7 @@ flowchart TD
 | Title | 主要作者 | Year | Venue | 一行相关性理由 |
 |-------|---------|------|-------|---------------|
 | [Title](https://scholar.google.com/scholar?q=Title) | Jane Doe | 2018 | NeurIPS | 奠基性；常被近期 X 工作引用 |
+
+---
+
+> 作者：lusca ｜ 版本：lusca-paper-search v<version> ｜ 出处：https://github.com/yjmm10/lusca-skill/tree/main/skills/lusca-paper-search
