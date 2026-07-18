@@ -46,7 +46,7 @@
 ## 4. 归属 Ownership
 
 - **主责 skill** + **文件** + **小节**，精确到可定位。
-  - 示例：`paper-polish-skill` → `prompts/diagnose.md` → §实验章小节诊断
+  - 示例：`lusca-paper-polish` → `prompts/diagnose.md` → §实验章小节诊断
   - 示例：`lusca-paper-search` → `scripts/search_papers_by_arxiv.py` → 分页解析
 - 横跨多 skill 时另列**协作 skill**，标注交接点。
 

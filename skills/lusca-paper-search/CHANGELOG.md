@@ -2,6 +2,24 @@
 
 本文件记录 lusca-paper-search 的版本演进。版本号规则见 `SKILL.md`「版本管理」。
 
+## [2.1.2] — 2026-07-17
+
+### Changed
+- 分工表与「不触发」节中润色 skill 的引用名由 `paper-polish-skill` 统一为 `lusca-paper-polish`（配合其纳入工作区并按规范命名，保证 `/lusca-paper-polish` 可触发、跨 skill 引用一致）
+
+## [2.1.1] — 2026-07-17
+
+### Added
+- 「后续衔接」节 + 「重要约定」补"交付附后续衔接"：交付时附一句本 skill 产出在主依赖链（`lusca-paper-search`→`lusca-pdf-parse`→`lusca-paper-read`）中的下一步——先 `/lusca-pdf-parse` 解析、再 `/lusca-paper-read` 精读（比直接读 PDF 更准、图不丢），另附 `/lusca` 复盘；遵 CLAUDE.md 新增「后续衔接提示（所有 skill 适用）」约定
+
+## [2.1.0] — 2026-07-17
+
+### Changed
+- 跨源去重时 **DBLP 优先级降为最低**：重复组里只要有非 dblp 源就丢弃 dblp 版本（DBLP 无原生摘要、信息不足），非 dblp 之间仍按信息完整度取最全。`search_papers.py` `_dedup_cross_source` 选保留版本由 `max(completeness)` 改为「非 dblp 优先 + completeness」；`SKILL.md`「去重与链接提取」「重要约定」同步；新增 `test_dedup_drops_dblp_when_any_non_dblp_dup` 回归测试
+
+### Added
+- `references/sources.md` 新增「检索字段（标题/摘要）」节：逐来源列出 query 匹配范围，澄清除 DBLP 外均覆盖摘要、DBLP 不存摘要是其去重低优先级的原因
+
 ## [2.0.1] — 2026-07-17
 
 ### Added

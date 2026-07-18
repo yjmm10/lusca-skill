@@ -9,6 +9,16 @@
 
 ---
 
+## [1.4.2] — 2026-07-17
+
+### Changed
+- 润色 skill 的引用名由 `paper-polish-skill` 统一为 `lusca-paper-polish`：分工表、关联判定示例（`SKILL.md`）、reflex 命名 slug 示例、`references/skill-linkage.md` 与 `references/dimensions.md` 的示例同步更新（配合其纳入工作区并按规范命名，保证跨 skill 引用一致）
+
+## [1.4.1] — 2026-07-17
+
+### Added
+- 「后续衔接」节：点明 lusca 是反省链条**终点**，后续操作为用户确认改进建议后由对应 skill 维护流程执行（lusca 本身不改 skill）；遵 CLAUDE.md 新增「后续衔接提示（所有 skill 适用）」约定
+
 ## [1.4.0] — 2026-07-14
 
 ### Changed

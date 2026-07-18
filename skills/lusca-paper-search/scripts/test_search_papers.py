@@ -175,3 +175,27 @@ def test_aggregate_dedups_flattens_and_counts(monkeypatch):
     assert flat[0]["title"] == "Dup"
     assert set(flat[0]["sources"]) == {"arxiv", "semantic_scholar"}
     assert flat[1]["title"] == "OnlyArxiv"
+
+
+def test_dedup_drops_dblp_when_any_non_dblp_dup(monkeypatch):
+    # dblp 与 s2 标题重复：即便 dblp 字段更全，去重也保留 s2（dblp 无原生摘要、优先级最低）
+    def fake_loader(source):
+        if source == "dblp":
+            return lambda q, sy, ey, m: [
+                {"title": "Dup", "source": "dblp", "publication_date": "2024-01-01",
+                 "abstract": "x", "venue": "V", "url": "u", "authors": ["A"], "year": 2024,
+                 "citation_count": 5},
+            ]
+        return lambda q, sy, ey, m: [
+            {"title": "Dup", "source": "semantic_scholar",
+             "publication_date": "2024-01-01", "abstract": "fuller"},
+        ]
+    monkeypatch.setattr(sp, "_load_source_func", fake_loader)
+    flat, total_before, k = sp._search_and_aggregate(
+        query="q", start_year=2024, end_year=2025, max_results=5,
+        sources=["dblp", "semantic_scholar"], parallel=False,
+    )
+    assert len(flat) == 1
+    # dblp 字段更全（venue/url/citation_count 齐全），仍被丢弃，保留 s2
+    assert flat[0]["source"] == "semantic_scholar"
+    assert set(flat[0]["sources"]) == {"dblp", "semantic_scholar"}

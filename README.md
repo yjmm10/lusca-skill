@@ -53,5 +53,8 @@ cc 在会话启动时加载 skill 的 description 与路由。会话中途改了
 ## 现有 skill
 
 - `skills/lusca` — 反省元技能（会话问题归档到 `./outputs/lusca/`）
+- `skills/lusca-paper-search` — 多源并行文献检索（arXiv / DBLP / OpenAlex / OpenReview / Semantic Scholar / Crossref / DeepXiv / Sciverse + 模型知识）
+- `skills/lusca-paper-read` — 论文精读与批判性评估（六维精读 + 五视角批判，落盘阅读笔记）
+- `skills/lusca-pdf-parse` — PDF / 图片 / DOCX 版面还原为结构化 Markdown（MinerU API，图片自动抽取，支持本地与 URL）
 
 > `patent-skills/`、`ResearchStudio/`、`paper_search/`、`project-uav-skill/` 等是待按方案 A 收拢的旧形态（部分含独立 `.git`）。

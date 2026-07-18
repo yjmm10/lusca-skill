@@ -7,7 +7,7 @@ max_papers_per_source: <N>
 total_hits: <H，去重前，取 CLI 末行>
 unique_papers: <M，去重后，取 CLI 末行>
 generated_at: "<YYYY-MM-DD HH:MM:SS>"
-generator: "lusca-paper-search@2.0.1"
+generator: "lusca-paper-search@2.1.0"
 ---
 
 # 文献检索报告：<QUERY 简述>

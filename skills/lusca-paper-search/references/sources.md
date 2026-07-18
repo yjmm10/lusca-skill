@@ -16,6 +16,23 @@
 | DeepXiv | 仅标准库（Agentic Data Interface @ `data.rag.ac.cn`） | Token 可选（`DEEPXIV_TOKEN`） |
 | Sciverse | 仅标准库（`api.sciverse.space/meta-search`） | 必需（`SCIVERSE_API_TOKEN`，`sv-...`） |
 
+## 检索字段（标题 / 摘要）
+
+各来源检索请求实际匹配的字段（`query` 命中范围）。除 DBLP 外均覆盖标题+摘要（部分含全文）；DBLP 因数据源不存摘要、检索阶段只匹配标题/作者/会议。
+
+| 来源 | 检索机制 | 匹配字段 | 含摘要? |
+|:---|:---|:---|:---|
+| arXiv | `all:<query>` 全字段 | 标题+摘要+comments+作者+… | ✅ |
+| Semantic Scholar | `paper/search?query=` | 标题+摘要 | ✅ |
+| OpenAlex | `search=` | 标题+摘要+全文 | ✅ |
+| Crossref | `query=`（bibliographic） | 标题+作者+container+摘要（若索引） | ✅ |
+| OpenReview | 拉 venue 全量后客户端 token AND 匹配 | 标题+摘要 | ✅ |
+| DeepXiv | 语义检索（embedding） | 标题+摘要（语义） | ✅ |
+| Sciverse | `/meta-search` BM25 | 标题+摘要（元数据） | ✅ |
+| DBLP | `q=`（书目检索） | **标题+作者+会议**（DBLP 不存摘要） | ❌ |
+
+> DBLP 无摘要可检索，是跨源去重时**优先级最低**的原因（见 `SKILL.md`「去重与链接提取」）：重复时优先保留有摘要的其它源版本。DBLP 命中后另有 `_fetch_abstract_from_doi` 用 DOI 事后补抓摘要，但仅用于补全字段，不参与检索匹配。
+
 ## 失败模式与降级
 
 - **聚合器行为**：`search_papers.py` 用 `ThreadPoolExecutor` 并发查询各来源。

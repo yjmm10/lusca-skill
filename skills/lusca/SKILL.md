@@ -2,7 +2,7 @@
 name: lusca
 description: >-
   反省元技能（可选·事后触发）：在其他任务完成后，对本会话中出现的、与所涉 skill 强相关的问题做多维度分析，输出"问题 + 改进建议"清单，按会话归档到 ./outputs/lusca/，一个 session 一份文档。不占用其他 skill 的功能、不接管任务型输入；只记录与分析，绝不自动改动任何 skill；改进建议需用户确认后由对应维护流程执行。用户提到"反省本 session""复盘刚才 skill 用得不对的地方""记录这次的问题与改法""lusca""reflex"时使用本技能。
-version: "1.4.0"
+version: "1.4.2"
 user-invocable: true
 argument-hint: "[可选：session 主题 / 涉及的 skill 名 / 问题简述]"
 allowed-tools: Read, Write, Edit, Grep, Glob, Bash
@@ -23,7 +23,7 @@ allowed-tools: Read, Write, Edit, Grep, Glob, Bash
 | 文献检索 | `lusca-paper-search` |
 | 精读一篇论文 / 批判性评估 | `lusca-paper-read` |
 | UAV 实验与存档 | `project-uav-skill` |
-| 论文润色 | `paper-polish-skill` |
+| 论文润色 | `lusca-paper-polish` |
 | 专利全流程 | `patent-skills` |
 | **复盘本次会话中 skill 暴露的问题、记录改法** | **本技能（lusca）** |
 | 真正去改某个 skill 的文件 | 对应 skill 维护流程（经 lusca 确认后） |
@@ -69,7 +69,7 @@ intake → (skill-linkage 判定) → analyze → record → 一次交付
 
 **只有与 skill 强相关的问题才进入 reflex 文档。** 判定三步（详见 `references/skill-linkage.md`）：
 
-1. **可定位**：问题能指到一个具体 skill（如 `lusca-paper-search`、`paper-polish-skill`）
+1. **可定位**：问题能指到一个具体 skill（如 `lusca-paper-search`、`lusca-paper-polish`）
 2. **在职责内**：问题落在该 skill 的功能/触发/流程/输出/规范范围内
    - 例：检索 skill（`lusca-paper-search`）的问题必须是关于检索触发、检索词构造、数据源选择、结果解析、检索范围内 skill 内容——**与检索无关的下游需求（如"检索完帮我写周报""结果翻译成日语"）不记**
 3. **可归因**：问题能映射到 skill 的某个组件（frontmatter / prompts / references / scripts / 护栏 / 协作）
@@ -96,7 +96,7 @@ intake → (skill-linkage 判定) → analyze → record → 一次交付
 - **目录**：`./outputs/lusca/`（gitignored，与 `lusca-paper-search` 输出同级）；用户指定其他路径时从其指定
 - **粒度**：一个 session 一份文档；同一 session 内多个问题汇总到同一份
 - **命名**：`reflex_{YYYYMMDDHHmmss}_{主题slug}.md`
-  - 示例：`reflex_20260714143022_paper-polish-code-abstraction.md`
+  - 示例：`reflex_20260714143022_lusca-paper-polish-code-abstraction.md`
 - **模板**：`assets/reflex-template.md`（复制即用）；逐节填写规范见 `references/template-guide.md`
 - 同一 session 追加问题时：**编辑**既有 reflex 文档（不新建），在问题清单区追加并更新汇总
 
@@ -124,6 +124,16 @@ intake → (skill-linkage 判定) → analyze → record → 一次交付
 1. **落盘**：写 reflex 到 `./outputs/lusca/reflex_{ts}_{slug}.md`（gitignored，不入库）
 2. **内联展示**：把完整 reflex（问题清单 + 汇总 + 确认区）内联返回，不折叠、不截断——用户无需开文件即可看到反省结果
 3. **声明**：未改动任何 skill 源；改进建议需用户确认后由维护流程执行
+
+---
+
+## 后续衔接
+
+lusca 是反省链条的**终点**：产出是 reflex 文档 + 待确认建议，**不向下游 skill 喂产出**。后续操作只有一条链路：
+
+- **用户审阅确认** → **由对应 skill 维护流程执行改动**（直接编辑 `skills/<name>/` 源、或经 link 脚本同步）——**lusca 本身不执行改动**（见 §不越界护栏）
+
+> 交付声明已点明（未改动任何 skill 源；建议需确认后由维护流程执行）；用户指明要改某个 skill 时，切到该 skill 的维护流程，不在 lusca 内进行。
 
 ---
 

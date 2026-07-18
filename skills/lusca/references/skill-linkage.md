@@ -10,7 +10,7 @@ lusca 只记录**与 skill 强相关**的问题。本文件给出判定方法与
 
 问题能否指到**一个具体 skill**？
 
-- ✅ 能说出 skill 名（如 `lusca-paper-search`、`paper-polish-skill`、`project-uav-skill`、`patent-skills`、`lusca` 自身）
+- ✅ 能说出 skill 名（如 `lusca-paper-search`、`lusca-paper-polish`、`project-uav-skill`、`patent-skills`、`lusca` 自身）
 - ❌ 问题是"模型本身能力不行""网络断了""我不熟悉这个领域""Markdown 渲染错位" → **剔除**（无 skill 归属）
 
 ### 2. 在职责内（In Scope）

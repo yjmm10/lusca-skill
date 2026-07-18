@@ -141,9 +141,11 @@ def _extract_code_links(paper: dict) -> list[str]:
 
 
 def _dedup_cross_source(results: dict[str, list[dict]]) -> dict[str, list[dict]]:
-    """跨源标题去重：归一化标题相同者合并为一条，保留信息最全的版本。
+    """跨源标题去重：归一化标题相同者合并为一条，保留最优版本。
 
-    - 合并后的记录在其主来源（信息最全那条的原 source）下展示，并新增 `sources`
+    - 选保留版本时 **DBLP 优先级最低**：DBLP 无原生摘要、信息不足，重复组里只要有
+      非 dblp 源就丢弃 dblp 版本；非 dblp 之间再按信息完整度取最全。
+    - 合并后的记录在其主来源（保留版本的原 source）下展示，并新增 `sources`
       字段记录所有命中来源，让用户知道哪些源都收录了该文。
     - 对保留的记录从摘要抽取 `code_links`（GitHub / HuggingFace / 项目页等）。
     - 无标题的论文不参与去重，原样保留。"""
@@ -155,9 +157,13 @@ def _dedup_cross_source(results: dict[str, list[dict]]) -> dict[str, list[dict]]
                 key = f"__notitle_{id(p)}"
             groups.setdefault(key, []).append(p)
 
+    def _best_of(papers: list[dict]) -> dict:
+        # 首要键：dblp 排最后（1 > 0）；次要键：信息完整度降序（取最全）。
+        return min(papers, key=lambda p: (1 if p.get("source") == "dblp" else 0, -_paper_completeness(p)))
+
     deduped: dict[str, list[dict]] = {s: [] for s in results}
     for papers in groups.values():
-        best = max(papers, key=_paper_completeness) if len(papers) > 1 else papers[0]
+        best = _best_of(papers) if len(papers) > 1 else papers[0]
         all_sources: list[str] = []
         for p in papers:
             s = p.get("source")
