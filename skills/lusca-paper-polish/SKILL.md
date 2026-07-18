@@ -5,7 +5,7 @@ description: >-
   中译英改写到可投稿质量。绝不臆造数据/引用/论断；任何可能改变科学含义的
   改动一律标注待作者确认。用户提到润色、改措辞、去 AI 味、中转英投稿、
   这话是不是说大了、polish my paper、tone down 时使用本技能。
-version: "1.5.0"
+version: "1.7.0"
 author: lusca
 user-invocable: true
 argument-hint: "[稿件文件路径 / 粘贴文本 / 段落]"
@@ -135,10 +135,13 @@ understand → diagnose → edit → account
 不同章节说话方式不同，别用同一种语体套全场。先认准这段话属于哪一节：Introduction 负责
 定位，Methods 服务于可复现，Results 用过去时陈述观察，Discussion 做解读与对冲，Abstract
 是论文的微缩，Title 要可检索且克制。详见 `references/section-conventions.md`（各节必答问题、
-推荐顺序、常见毛病）。**各节润色的方向与深度**（凸什么、收什么、骨架如何组织得饱满、亮点
-突出）见 `assets/polish-paradigms.md`（编写参考模板）——section-conventions 讲"该说什么"，paradigms 讲"按
-什么范式与深度把它组织起来"。注意：paradigms 里的"突出亮点 / 避免短板"是组织策略，**不凌驾
-于 §最高准则 与 §校准 之上**——不注水、不隐瞒关键事实是硬底线。
+推荐顺序、常见毛病）。**各节润色的方向与深度 + 审稿人会怎么挑刺**（凸什么、收什么、骨架如何
+组织得饱满、亮点突出，以及该节的隐性严谨性事故）见 `assets/paradigms/`——**按节 Read 对应文件**
+（`abstract.md` / `introduction.md` / `related-work.md` / `methods.md` / `experiments.md` /
+`conclusion.md`，先看 `README.md` 的类型判断与各节专属审稿维度速查），不必全读。section-conventions
+讲"该说什么"，paradigms 讲"按什么范式与深度把它组织起来 + 守住哪些审稿底线"。注意：paradigms
+里的"突出亮点 / 避免短板"是组织策略，**不凌驾于 §最高准则 与 §校准 之上**——不注水、不隐瞒
+关键事实是硬底线。
 
 ## 校准：别让作者说大话
 
@@ -324,7 +327,8 @@ appears to）给推测。完整动词阶梯与替代表达见 `references/academ
 | `references/section-conventions.md` | 需要按章节精修时（各节必答问题、顺序、常见毛病） |
 | `references/academic-phrasebank.md` | 校准措辞 / 中译英选词时（动词阶梯、gap / 局限 / 过渡表达） |
 | `references/ai-tone-guardrails.md` | 去 AI 腔 / 软化注水论断时（信号清单、高风险词表、替换方向） |
-| `assets/polish-paradigms.md` | 定润色方向与深度时（摘要/引言/相关工作/方法/实验/结论各节编写参考骨架：研究型 vs 综述型两变体、凸什么、常见毛病、自检） |
+| `assets/paradigms/README.md` | 定润色方向时先读（类型判断、各节专属审稿维度速查、总信条、边界重申） |
+| `assets/paradigms/{abstract,introduction,related-work,methods,experiments,conclusion}.md` | 按节精修时 Read 对应文件（组织范式 + 本节专属审稿维度/避坑 + 自检；研究型 vs 综述型两变体） |
 
 ---
 

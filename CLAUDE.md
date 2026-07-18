@@ -8,6 +8,18 @@
 - **只读发现层**：`.claude/skills/<name>` → `../../skills/<name>`；`~/.claude/skills/<name>` → 仓库绝对路径
 - ❌ 禁止在 `.claude/skills/` 或 `~/.claude/skills/` 里直接编辑实体内容
 
+## SKILL.md 精简：长内容拆文件（所有 skill 适用）
+
+SKILL.md 是 skill 触发时**必载**的入口，保持骨架精简；较长的模板、要求、清单、范例拆到独立文件，AI 按需 Read，避免每次触发都全量加载。
+
+- **拆去哪**：
+  - `references/` — 指导性说明、查表资料（章节惯例、措辞阶梯、词表、API 用法）
+  - `assets/` — 模板、范例、范式（笔记模板、润色范式、报告骨架）
+  - `prompts/` — 可复用的提示片段
+- **SKILL.md 里怎么留**：核心准则 + 主流程 + 一张「Reference 文件索引」表（文件 → **何时 Read**），让 AI 一眼判断当前要不要读某个文件——索引表而非全文
+- **何时该拆**：某节展开明显拖重 SKILL.md（十几行以上的并列清单、多套并列范式、独立长模板）就拆；三五条的简短约定就地放，不必拆
+- **范式**：见 `skills/lusca-paper-polish/`——主体只讲准则与流程，`references/`（section-conventions / academic-phrasebank / ai-tone-guardrails）与 `assets/paradigms/` 装细节，SKILL.md 末尾索引表逐文件注明何时读
+
 ## 改 skill 后怎么生效
 
 | 改动 | 操作 |
