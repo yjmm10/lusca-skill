@@ -5,7 +5,7 @@ description: >-
   DeepXiv/Sciverse 八大开源 API + 模型自身知识，覆盖英文 CS/理工与顶会
   (NeurIPS/ICLR/ICML)。用户提到搜论文、查文献、找 related work、prior art、
   近 X 年某主题发表时使用本技能。
-version: "2.1.2"
+version: "2.1.3"
 author: lusca
 user-invocable: true
 argument-hint: "[可选：检索主题 / 年份范围 / 指定来源]"
@@ -298,7 +298,12 @@ python "$SEARCH" \
 - **去重 ≠ 删除。** 脚本跨源去重只合并标题相同的重复条目（保留最优版本——DBLP 优先级最低，见上），不丢弃任何论文。
 - **绝不追问确认。** 全部输入自动推断（见「输入」节）。首轮即跑。
 - **错误原样上报。** 某来源失败时，把 stderr 消息如实报给用户，而非隐瞒或盲目重试。
-- **文末出处块。** 落盘报告正文结尾附一行出处（遵 CLAUDE.md「文档输出规范」）：`> 作者：lusca ｜ 版本：lusca-paper-search v<version> ｜ 出处：https://github.com/yjmm10/lusca-skill/tree/main/skills/lusca-paper-search`
+- **文末出处块。** 落盘报告正文结尾附**三行出处**（遵 CLAUDE.md「文档输出规范」，每行一个要素）：
+  ```
+  > 作者：lusca
+  > 版本：lusca-paper-search v<version>
+  > 出处：https://github.com/yjmm10/lusca-skill/tree/main/skills/lusca-paper-search
+  ```
 - **交付附后续衔接。** 落盘报告交付时，除路径 + 要点外，附一句后续可衔接操作（见 §后续衔接）。
 
 ---

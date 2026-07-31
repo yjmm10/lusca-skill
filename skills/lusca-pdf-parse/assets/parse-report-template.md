@@ -32,4 +32,6 @@ generator: "lusca-pdf-parse@1.0.0"
 
 ---
 
-> 作者：lusca ｜ 版本：lusca-pdf-parse v<version> ｜ 出处：https://github.com/yjmm10/lusca-skill/tree/main/skills/lusca-pdf-parse
+> 作者：lusca
+> 版本：lusca-pdf-parse v<version>
+> 出处：https://github.com/yjmm10/lusca-skill/tree/main/skills/lusca-pdf-parse

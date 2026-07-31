@@ -1,5 +1,13 @@
 # CHANGELOG — lusca-paper-read
 
+## [1.10.2] — 2026-07-31
+
+### Added
+- 笔记新增「资源链接块」：一级标题（H1）下紧接**多行引用块**，完整保留论文本身（arXiv abs / PDF / DOI）及其关联的 GitHub / 数据集 / 项目主页 / demo 等外链（每条一行，全无则 n/a），严禁丢弃或截断 URL——读者复现 / 跟进的第一入口；`SKILL.md`「阅读笔记结构」+「模板使用约定」与 `assets/reading-note-template.md` 同步占位。来源：用户要求"论文阅读时候，需要将论文的 github/dataset/project 链接完整保留，并放在一级标题下使用引用语法多行展示"＋"也要论文链接记录下来"
+
+### Changed
+- 文末出处块由"一行三要素（｜ 分隔）"改为"**三行引用块**"（每行一个要素：作者 / 版本 / 出处），提升扫读可读性；`SKILL.md`「输出与存放」与 `assets/reading-note-template.md` 同步（遵 CLAUDE.md「文档输出规范」）
+
 ## [1.10.1] — 2026-07-17
 
 ### Changed

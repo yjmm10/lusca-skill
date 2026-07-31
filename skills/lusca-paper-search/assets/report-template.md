@@ -69,4 +69,6 @@ flowchart TD
 
 ---
 
-> 作者：lusca ｜ 版本：lusca-paper-search v<version> ｜ 出处：https://github.com/yjmm10/lusca-skill/tree/main/skills/lusca-paper-search
+> 作者：lusca
+> 版本：lusca-paper-search v<version>
+> 出处：https://github.com/yjmm10/lusca-skill/tree/main/skills/lusca-paper-search

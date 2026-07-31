@@ -21,6 +21,13 @@ tags: []         # 主题标签，如 [diffusion-policy, robotics, rl]
 
 # 阅读笔记：<论文标题>
 
+<!-- 资源链接块：H1 下紧接多行引用块，完整保留论文本身（arXiv/PDF/DOI）及关联的 GitHub / 数据集 / 项目主页 / demo 等外链，每条一行；全无则 n/a。严禁丢弃或截断 URL -->
+> **资源**
+> - 论文：[url 或 n/a]
+> - 代码：[url 或 n/a]
+> - 数据集：[url 或 n/a]
+> - 项目主页：[url 或 n/a]
+
 ## TL;DR
 
 <!-- 2–3 句，可独立传播：用什么方法解决了什么问题，核心结论是什么，主要 caveat 是什么 -->
@@ -161,4 +168,6 @@ flowchart LR
 
 **[推荐深读 / 选读 / 跳过]** — [一句理由]
 
-> 作者：lusca ｜ 版本：lusca-paper-read v<version> ｜ 出处：https://github.com/yjmm10/lusca-skill/tree/main/skills/lusca-paper-read
+> 作者：lusca
+> 版本：lusca-paper-read v<version>
+> 出处：https://github.com/yjmm10/lusca-skill/tree/main/skills/lusca-paper-read

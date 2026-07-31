@@ -41,11 +41,16 @@ link 脚本幂等；实体目录冲突会**报错不覆盖**；`--dry-run` 可�
 
 skill 产出的 markdown 文档（阅读笔记、检索导览、反省记录等落盘文件，以及正文里粘贴的 md 片段）统一遵守：
 
-- **文末出处块**：正文结尾附一行，三要素齐全，取自当前 skill 的 `SKILL.md` frontmatter：
+- **文末出处块**：正文结尾附**三行引用块**，三要素齐全（每行一个要素），取自当前 skill 的 `SKILL.md` frontmatter：
   - **作者** — `author`（项目默认 `lusca`，主页 https://github.com/yjmm10 ）
   - **版本** — `version`
   - **出处（含链接）** — `https://github.com/yjmm10/lusca-skill/tree/main/skills/<name>`
-  - 形如：`> 作者：lusca ｜ 版本：lusca-paper-read v1.9.0 ｜ 出处：https://github.com/yjmm10/lusca-skill/tree/main/skills/lusca-paper-read`
+  - 形如（三行，每行以 `>` 开头）：
+    ```
+    > 作者：lusca
+    > 版本：lusca-paper-read v1.9.0
+    > 出处：https://github.com/yjmm10/lusca-skill/tree/main/skills/lusca-paper-read
+    ```
 - **frontmatter 保留**：处理带 frontmatter 的 md（读入、基于模板生成、引用片段）时**保留其 frontmatter**，不剥离；仅按需在原 frontmatter 上补字段，不重写已有字段。
 
 ## 后续衔接提示（所有 skill 适用）

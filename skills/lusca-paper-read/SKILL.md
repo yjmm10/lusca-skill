@@ -5,7 +5,7 @@ description: >-
   方法概要、批判性评估、可复用要点）。融合六维精读框架与多视角批判（含反方最强论证），
   立足读者视角——不是给作者的 referee report。用户提到读论文、精读这篇、帮我看看这篇论文、
   这篇讲了啥、值不值得读、paper read、read this paper 时使用本技能。
-version: "1.10.1"
+version: "1.10.2"
 author: lusca
 user-invocable: true
 argument-hint: "[论文路径 / arXiv ID / URL / 粘贴文本]"
@@ -137,7 +137,12 @@ locate → read-full → six-dim-read → critique-lenses → note → save
   （`title`/`authors`/`year`/`venue`/`arxiv`/`doi`/`read_date`/`verdict`/`slug`/`tags`），
   便于后续按 verdict / tag 检索
 - **交付精简**：落盘后只返回路径 + 一两句要点（论文定位 + verdict），**不内联重复展示完整笔记**——完整内容已写入文件，再贴一遍是冗余噪声
-- **文末出处块**：正文结尾附一行出处（遵 CLAUDE.md「文档输出规范」）：`> 作者：lusca ｜ 版本：lusca-paper-read v<version> ｜ 出处：https://github.com/yjmm10/lusca-skill/tree/main/skills/lusca-paper-read`
+- **文末出处块**：正文结尾附**三行出处**（遵 CLAUDE.md「文档输出规范」，每行一个要素）：
+  ```
+  > 作者：lusca
+  > 版本：lusca-paper-read v<version>
+  > 出处：https://github.com/yjmm10/lusca-skill/tree/main/skills/lusca-paper-read
+  ```
 
 ---
 
@@ -155,7 +160,8 @@ locate → read-full → six-dim-read → critique-lenses → note → save
 ## 阅读笔记结构
 
 笔记结构与字段**以 `assets/reading-note-template.md` 为准**——生成时严格对照模板逐节填写。
-元信息**只写在 YAML frontmatter**，正文不重复。主体节：
+元信息**只写在 YAML frontmatter**，正文不重复。**一级标题（H1）下紧接一个多行引用块**完整保留
+论文本身及其关联资源链接（论文页 / 代码 / 数据集 / 项目主页 / demo 等，每条一行、无则 n/a），见「模板使用约定」。主体节：
 
 - **TL;DR**：2–3 句可独立传播的总结（核心 claim + 关键证据 + 主要 caveat）
 - **1. 研究内容**：1.1 研究问题、痛点与动机（**研究问题 / 痛点 / 动机·重要性 / 领域定位** 四点） / 1.2 核心贡献 / 1.3 相关工作脉络（mermaid 流程图）
@@ -175,6 +181,14 @@ locate → read-full → six-dim-read → critique-lenses → note → save
 ## 模板使用约定
 
 - **元信息只在 frontmatter**：title/authors/year/venue/arxiv/doi/source/read_date/verdict/slug/tags 写进 YAML；正文不再单列元信息节
+- **资源链接块（H1 下、TL;DR 前）**：一级标题 `# 阅读笔记：<标题>` 下紧接一个**多行引用块**，完整保留论文本身及其关联外链——**论文页（arXiv abs / PDF / DOI，取自 frontmatter `arxiv`/`doi`/`source`）**、代码仓库 / 数据集 / 项目主页 / demo / Leaderboard 等（关联外链从论文 abstract / intro / footnote / 附录搜集）；**每条一行**（`> - 论文：<url>` 形式），有几条列几条，全无则写 `> n/a`。**严禁丢弃或截断 URL**——这是读者复现 / 跟进的第一入口。例：
+  ```
+  > **资源**
+  > - 论文：https://arxiv.org/abs/xxxx.xxxxx
+  > - 代码：https://github.com/org/repo
+  > - 数据集：https://huggingface.co/datasets/xxx
+  > - 项目主页：https://project-url
+  ```
 - **逐节填写，不删节**：模板每一节（含小点）都要在笔记里出现；无内容写 `n/a` 并说明原因
 - **frontmatter 必填**：`title`/`read_date`/`verdict`/`slug` 必填；其它字段无则留空字符串/空数组
 - **批判性评估是自然叙述**：六维与五视角是**内化指导**，不作为固定输出结构对号入座、不贴框架标签；发现融入叙述；若反方论证有力可单独引出（非强制）；综合可信度必出

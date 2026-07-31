@@ -5,7 +5,7 @@ description: >-
   表格、公式、图表、阅读顺序，图片自动抽取到本地）。支持本地文件与 URL
   （含 arXiv PDF），可批量。用户提到解析 PDF、PDF 转 markdown、提取 PDF 内容、
   版面还原、图片抽取、文档数字化、parse pdf、pdf to markdown 时使用本技能。
-version: "1.0.1"
+version: "1.0.2"
 author: lusca
 user-invocable: true
 argument-hint: "[PDF 路径 / 图片 / URL / arXiv PDF 链接，可多个]"
@@ -163,8 +163,12 @@ parse-inputs → run-script → locate-markdown → report → save
   跨目录引用时按需调整
 - **frontmatter 保留**：若输入是带 frontmatter 的 md（少见），处理时保留其 frontmatter
 - **交付精简**：落盘后只返回产出目录 + markdown 路径 + 一两句要点，**不内联重复展示完整 Markdown**
-- **文末出处块**：解析报告结尾附一行出处（遵 CLAUDE.md「文档输出规范」）：
-  `> 作者：lusca ｜ 版本：lusca-pdf-parse v<version> ｜ 出处：https://github.com/yjmm10/lusca-skill/tree/main/skills/lusca-pdf-parse`
+- **文末出处块**：解析报告结尾附**三行出处**（遵 CLAUDE.md「文档输出规范」，每行一个要素）：
+  ```
+  > 作者：lusca
+  > 版本：lusca-pdf-parse v<version>
+  > 出处：https://github.com/yjmm10/lusca-skill/tree/main/skills/lusca-pdf-parse
+  ```
 
 ---
 
