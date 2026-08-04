@@ -52,6 +52,7 @@ skill 产出的 markdown 文档（阅读笔记、检索导览、反省记录等�
     > 出处：https://github.com/yjmm10/lusca-skill/tree/main/skills/lusca-paper-read
     ```
 - **frontmatter 保留**：处理带 frontmatter 的 md（读入、基于模板生成、引用片段）时**保留其 frontmatter**，不剥离；仅按需在原 frontmatter 上补字段，不重写已有字段。
+- **段落内不硬换行（一段一行）**：正文段落与每个列表项在源码里**写在一行**，不在句中按列宽折行（例：不要写到"…线性注意力经"就断行、下一行接"Kimi Linear 发展为…"）；段落之间用空行分隔，列表项每个 item 一行。硬换行会让源码与部分渲染器把同一段看成多段（视觉换段）、可读性差。语义上该拆的拆成列表 / 分段，语义连贯的一段就写在一行——二者都不靠句中折行。
 
 ## 后续衔接提示（所有 skill 适用）
 
