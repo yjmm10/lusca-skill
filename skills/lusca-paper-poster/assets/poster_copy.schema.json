@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "lusca-paper-poster poster_copy",
+  "type": "object",
+  "required": ["meta", "problem", "contribution", "method", "results", "takeaway", "caveat", "figures", "qr"],
+  "properties": {
+    "meta": {
+      "type": "object",
+      "required": ["title", "authors", "venue", "slug"],
+      "properties": {
+        "title": { "type": "string", "minLength": 1 },
+        "authors": {
+          "oneOf": [
+            { "type": "string" },
+            { "type": "array", "items": { "type": "string" } }
+          ]
+        },
+        "venue": { "type": "string" },
+        "slug": { "type": "string", "minLength": 1 }
+      }
+    },
+    "problem": { "type": "array", "items": { "type": "string" }, "maxItems": 3 },
+    "contribution": { "type": "array", "items": { "type": "string" }, "maxItems": 3 },
+    "method": { "type": "array", "items": { "type": "string" }, "maxItems": 5 },
+    "results": { "type": "array", "items": { "type": "string" }, "maxItems": 4 },
+    "takeaway": { "type": "string" },
+    "caveat": { "type": "string" },
+    "figures": {
+      "type": "object",
+      "properties": {
+        "method": { "type": ["string", "null"] },
+        "result": { "type": ["string", "null"] }
+      }
+    },
+    "qr": {
+      "type": "object",
+      "properties": {
+        "paper_url": { "type": ["string", "null"] },
+        "code_url": { "type": ["string", "null"] }
+      }
+    }
+  }
+}

@@ -7,7 +7,7 @@ description: >-
   绝不编造论文未说的内容，公式只讲用途不讲推导。用户提到把论文写成博客、论文科普、通俗解读这篇论文、
   博客化分析、写公众号文章解读论文、给同行讲讲这篇论文、论文故事化、深入浅出讲一下这篇、
   paper to blog、explain this paper、paper explainer 时使用本技能。
-version: "1.2.8"
+version: "1.5.0"
 author: lusca
 user-invocable: true
 argument-hint: "[parse 结果 / 精读笔记 / 论文地址 / arXiv ID / URL / PDF / 粘贴文本]"
@@ -136,7 +136,7 @@ locate-source → read-or-reuse → outline-blog → write-blog → polish-tone 
 - **并列分点用 markdown 列表，不要塞在一段**：凡是用"第一/第二""一是/二是""首先/其次/最后"或顿号罗列的并列要点，一律拆成无序列表逐行写；只有 2 个且语义紧密连贯的并列可留在段里，3 个及以上必须列表化
 - **列表不要孤立**：列表前一句要"引出"（"我建议你关注三点""几个该打问号的地方"），列表后要有一句收束或过渡到下一段，别让列表突兀地夹在段落之间
 - **段间要有承接**：每段开头尽量接住上一段尾巴（"那……""换句话说""但这还不够""落到实操""再往远看"），让全文读起来是一条线，不是一堆散点
-- **一句话带走放开头作 TL;DR**：放氛围图后、导语前，用引用块给核心结论（用什么方法解决什么问题、对谁有用），让读者一眼抓核心、判断要不要读下去；结尾不再重复
+- **一句话总结放开头作 TL;DR**：放氛围图后、导语前，用引用块给核心结论（用什么方法解决什么问题、对谁有用），让读者一眼抓核心、判断要不要读下去；结尾不再重复
 
 宁可把多个机制/理由/条件拆成列表，也不要压成"一段塞五点"——后者读者会跳读，而且显得零散。
 
@@ -151,11 +151,12 @@ locate-source → read-or-reuse → outline-blog → write-blog → polish-tone 
 
 两类图分工，"一张"只约束外部氛围图，不约束论文原图：
 
-- **外部氛围图只要一张（开头）**：默认 Bing 每日一图（取不到降级 picsum.photos），放 H1 后正文最开头，**无下方 caption**，来源记 frontmatter `cover`。全篇只这一张外部图，不再多处点缀
+- **外部氛围图只要一张（开头）**：默认 Bing 每日一图（取不到降级 picsum.photos），放 H1 后正文最开头，**无下方 caption**。**正文里直接用外链 URL**（不换成本地路径，远程即看即载），**同时下载一份到 `imgs/cover.<ext>` 做备份**（外链失效时兜底）；外链 URL、本地备份、来源描述记 frontmatter（`cover` 记外链 URL、`cover_backup` 记本地路径、`cover_source` 记来源）。全篇只这一张外部图，不再多处点缀
 - **论文原图该嵌就嵌（不限张数）**：结果图、架构图、pipeline 图等承载事实的论文图，转存到 `imgs/` 嵌入正文，**配一句白话 caption**（解释图说明什么、读者该看什么），**严禁只写文字路径**——这是事实层，和氛围图不是一回事，别因为"一张图"就删掉
-- **两种外部图来源，默认 Bing**：
-  - **Bing 每日一图（默认）**：`https://cn.bing.com/HPImageArchive.aspx?format=js&idx=0&n=1&mkt=zh-CN` 取今日图 JSON，拼 `https://cn.bing.com` + `images[0].url` 下载（加 `User-Agent` 头），`images[0].copyright` 记入 frontmatter `cover`；艺术感强
-  - **picsum.photos（备选/降级）**：`https://picsum.photos/seed/<seed>/<w>/<h>`，Unsplash 艺术摄影、免费商用、稳定；Bing 取不到时降级
+- **两种外部图来源，默认 Bing——同一天不要固定同一张**：两种来源都用 **slug 做差异化因子**（不同博客 slug 不同 → 拿到不同图；同一篇 re-run 稳定不乱换），避免同一天所有博客都撞同一张：
+  - **Bing 每日一图（默认）**：`https://cn.bing.com/HPImageArchive.aspx?format=js&idx=0&n=8&mkt=zh-CN` 一次取**最近 8 天的候选池**（`n=8`，不是只取今日一张），用 `hash(slug) % len(images)` 从池里挑一张（不要总取 `images[0]`）；外链 = `https://cn.bing.com` + `image.url`，`image.copyright` 记入 frontmatter `cover_source`；加 `User-Agent` 头下载；艺术感强
+  - **picsum.photos（备选/降级）**：`https://picsum.photos/seed/<slug>/<w>/<h>`——**seed 用 slug**（别用固定字面量，否则篇篇撞图），Unsplash 艺术摄影、免费商用、稳定；Bing 取不到时降级
+- **外链保留 + 本地备份**：氛围图在正文用**外链 URL** 嵌入（远程可访问、即看即载，不要替换成本地 `imgs/` 路径），同时把外链 `curl` 下载到 `imgs/cover.<ext>` 存档（外链失效时不至于开天窗）；frontmatter `cover` 记**外链 URL**（正文实际引用的图片地址）、`cover_backup` 记本地备份相对路径、`cover_source` 记来源描述（`Bing 每日一图 · <copyright>` 或 `picsum · seed=<slug>`，用于溯源/版权标注）
 - **emoji 适当点缀，不堆砌**：资源块每条配平台 emoji（📄 论文 / 💻 代码 / 🧩 模型 / 📊 数据集 / 🎮 Demo）；正文也适当加——H2 小标题配一个语义 emoji（如 🎯🛠️📈🤔🧊💡）、列表关键词配相关 emoji（如 🎓 学、🔁 迭代、📋 表格、➗ 公式）；约束：数字/基准结果/caveat 严肃处不加、语义相关不重复、不每句都加
 
 ### 项目资源块：前面就给链接，方便动手
@@ -177,11 +178,16 @@ locate-source → read-or-reuse → outline-blog → write-blog → polish-tone 
     └── imgs/                         # 复用自 parse/read 或转存自论文的图
   ```
 - **slug**：取自论文标题或 arXiv ID（kebab-case）；若基于 parse/read 产出，与上游同 slug 以便对照
-- **frontmatter**：`title`（博客标题，活泼版，用关键词不塞全名）/ `subtitle`（可选）/ `paper`（原论文完整标题）/ `authors` / `arxiv` / `blog_date` / `read_minutes` / `slug` / `tags`——见模板
+- **frontmatter**：`title`（博客标题，活泼版，用关键词不塞全名）/ `subtitle`（可选）/ `paper`（原论文完整标题）/ `authors` / `arxiv` / `blog_date` / `read_minutes` / `slug` / `category`（单一主分类）/ `tags`（2-4 个泛化技术标签）/ `abstract`（≤200 字博文摘要）/ `cover`（氛围图外链 URL）/ `cover_backup`（本地备份路径）/ `cover_source`（可选，来源描述）——见模板
+- **`category` 与 `tags` 用泛化技术标签，不造论文专属细标签**（如 ExtractBench、某模型代号只进标题与正文，不进 tags）：
+  - **`category`（单选，技术大类）**：人工智能 / 大模型（LLM） / 机器学习 / 深度学习 / NLP / 计算机视觉 / 多模态 / 强化学习 / RAG / Agent / 智能文档 / 知识图谱
+  - **`tags`（多选 2-4 个，泛化）**：LLM / AIGC / 人工智能 / 机器学习 / 深度学习 / NLP / 计算机视觉 / 多模态 / 强化学习 / RAG / Agent / 智能文档 / 知识图谱 / 大模型应用 / AI 评测
+- **`cover` 必须是 http(s):// 开头的图片直链**——正文实际能加载的远程图片地址，❌ 严禁填 `Bing 每日一图 · <copyright>` 这类文字描述（文字来源描述放 `cover_source`）；落盘前自检 `cover` 以 `http` 开头，否则不合规
+- **`abstract` 是 frontmatter 的博文摘要**（≤200 字中文）：用于平台描述/SEO/列表预览，概括"论文讲了什么、核心贡献、对读者意味什么"；与正文 TL;DR（一句话钩子）互补——abstract 是完整段落、TL;DR 是一句话
 - **文末出处块**（遵 CLAUDE.md「文档输出规范」，三行）：
   ```
   > 作者：lusca
-  > 版本：lusca-paper-blog v1.2.8
+  > 版本：lusca-paper-blog v1.5.0
   > 出处：https://github.com/yjmm10/lusca-skill/tree/main/skills/lusca-paper-blog
   ```
 - **段落不硬换行**：遵 CLAUDE.md——正文段落与列表项在源码里写在一行，段间空行分隔，不在句中按列宽折行

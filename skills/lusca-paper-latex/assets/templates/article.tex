@@ -1,0 +1,160 @@
+% =============================================================================
+% lusca-paper-latex default skeleton — generic article (English; pdflatex-ready)
+%
+% Usage: place your content between \begin{document} and \end{document}.
+%   - For Chinese / CJK content: switch to xelatex and enable the xeCJK block
+%     commented out below.
+%   - To switch document class (IEEE / ACM / NeurIPS / apa7 ...): see
+%     assets/templates/README.md.
+%
+% Compile:
+%   latexmk -pdf main.tex
+%   or four manual passes: pdflatex main && bibtex main && pdflatex main && pdflatex main
+% =============================================================================
+
+\documentclass[11pt,a4paper]{article}
+
+% ---- Encoding & fonts (pdflatex) ----
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+% For Chinese / CJK content: comment out the three lines above, enable the
+% xeCJK block below, and compile with xelatex instead of pdflatex:
+% \usepackage{xeCJK}
+% \setCJKmainfont{Noto Serif CJK SC}
+% \setCJKsansfont{Noto Sans CJK SC}
+% \setCJKmonofont{Noto Sans Mono CJK SC}
+
+% ---- Layout ----
+\usepackage[margin=1in]{geometry}
+\usepackage{microtype}
+
+% ---- Math ----
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{mathtools}
+
+% ---- Figures & tables ----
+\usepackage{graphicx}
+\usepackage{booktabs}      % three-line tables: \toprule \midrule \bottomrule
+\usepackage{caption}
+\usepackage{subcaption}    % subfigures
+\usepackage{float}         % [H] for strict placement
+
+% ---- Code (as needed) ----
+\usepackage{listings}
+\lstset{basicstyle=\ttfamily\small, breaklines=true, frame=single}
+
+% ---- Bibliography ----
+\usepackage[round,authoryear]{natbib}   % \citep \citet; use [square,numbers] for brackets
+
+% ---- Links (hyperref MUST be loaded last) ----
+\usepackage{xurl}           % break long URLs; load alongside/after hyperref
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue}
+
+% ---- Theorem-like environments (enable as needed) ----
+% \newtheorem{theorem}{Theorem}
+% \newtheorem{lemma}{Lemma}
+% \newtheorem{definition}{Definition}
+
+% ---- Metadata ----
+\title{Paper Title}
+\author{%
+  Author One\thanks{Corresponding author: \texttt{one@example.edu}} \and
+  Author Two\\
+  Department, Institution\\
+  \texttt{\{one,two\}@example.edu}%
+}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+% Abstract: 150--250 words; present tense for general facts, past tense for what was done.
+\begin{abstract}
+Abstract paragraph (150--250 words): state the problem, the approach, the key results, and the main contribution.
+\end{abstract}
+
+\noindent\textbf{Keywords:} keyword one, keyword two, keyword three
+
+% =============================================================================
+\section{Introduction}
+\label{sec:intro}
+
+Cite with \citep{key2024} (parenthetical) or \citet{key2024} (narrative); cross-reference with Section~\ref{sec:method}, Figure~\ref{fig:arch}, Table~\ref{tab:results}, Equation~\eqref{eq:loss}. Use a non-breaking space (\textasciitilde{}) to keep a number attached to its label.
+
+% =============================================================================
+\section{Method}
+\label{sec:method}
+
+Inline math such as $\mathcal{L}(\theta)$ is delimited by dollar signs. Display equations use the \texttt{equation} environment with a \textbackslash label for cross-referencing:
+\begin{equation}
+  \label{eq:loss}
+  \mathcal{L}(\theta) = -\frac{1}{N}\sum_{i=1}^{N} \log p_\theta(y_i \mid x_i).
+\end{equation}
+
+Multi-line alignments use \texttt{align}:
+\begin{align}
+  \nabla_\theta \mathcal{L} &= \mathbb{E}_{(x,y)\sim\mathcal{D}}\bigl[\nabla_\theta \log p_\theta(y\mid x)\bigr], \label{eq:grad}\\
+  \theta &\leftarrow \theta - \eta\, \nabla_\theta \mathcal{L}. \label{eq:update}
+\end{align}
+
+% ---- Figure example (uncomment as needed) ----
+% \begin{figure}[htbp]
+%   \centering
+%   \includegraphics[width=0.8\linewidth]{figures/arch}
+%   \caption{Overview of the architecture. Write captions as full declarative sentences, capitalized, with a closing period.}
+%   \label{fig:arch}
+% \end{figure}
+
+% ---- Table example (uncomment as needed) ----
+% \begin{table}[htbp]
+%   \centering
+%   \caption{Results on the benchmark.}
+%   \label{tab:results}
+%   \begin{tabular}{lcc}
+%     \toprule
+%     Method & Accuracy & F1 \\
+%     \midrule
+%     Baseline & 0.72 & 0.70 \\
+%     Ours     & \textbf{0.89} & \textbf{0.87} \\
+%     \bottomrule
+%   \end{tabular}
+% \end{table}
+
+% =============================================================================
+\section{Experiments}
+\label{sec:exp}
+
+Report results in the past tense (``The model achieved \ldots''), but refer to tables and figures in the present tense (``Table~\ref{tab:results} shows \ldots'').
+
+% =============================================================================
+\section{Conclusion}
+\label{sec:conclusion}
+
+Summarize the contribution and its significance. Do not merely repeat the abstract.
+
+% =============================================================================
+% Bibliography --- choose ONE option. The default is the inline Option B so the
+% template compiles out-of-the-box; switch to Option A when you have a .bib file.
+
+% --- Option A: BibTeX (recommended when references.bib is present) ---
+% \bibliographystyle{plainnat}
+% \bibliography{references}
+
+% --- Option B: inline (self-contained; compiles without bibtex) ---
+\begin{thebibliography}{99}
+\bibitem[Author(2024)]{key2024}
+  Author, A., \& Coauthor, B. (2024). Paper title. \emph{Journal Name}, 12(3), 45--67.
+\end{thebibliography}
+
+% =============================================================================
+% Typeset with lusca-paper-latex (LaTeX comments; safe to delete before submission).
+% Author: lusca
+% Version: lusca-paper-latex v1.0.0
+% Source: https://github.com/yjmm10/lusca-skill/tree/main/skills/lusca-paper-latex
+% =============================================================================
+
+\end{document}

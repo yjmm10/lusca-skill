@@ -2,6 +2,26 @@
 
 所有版本变更记录。版本号规则：MAJOR（流程/输出规范 breaking）/ MINOR（新节、新范式、新 reference）/ PATCH（措辞、typo）。
 
+## [1.5.0] - 2026-08-07
+
+### Added
+- **frontmatter 新增 `abstract` 字段（≤200 字中文博文摘要）**：用于平台描述/SEO/列表预览，概括"论文讲了什么、核心贡献、对读者意味什么"；与正文 TL;DR（一句话钩子）互补——abstract 是完整段落、TL;DR 是一句话。SKILL.md「输出与存放」节（字段列表 + `abstract` 说明条）、模板 frontmatter 同步。与 lusca-report-blog v1.5.0 一并加 abstract，两 skill 字段对齐。
+
+## [1.4.0] - 2026-08-07
+
+### Changed
+- **frontmatter `cover` 改为存外链 URL（不再是来源描述）**：原本 `cover` 记文字来源描述（`Bing 每日一图 · <copyright>`）、`cover_url` 记外链，两个字段拆分冗余且 `cover` 不是可直接用的链接。合并为 `cover` = 氛围图外链 URL（正文实际引用的图片地址）、`cover_backup` = 本地备份路径、新增可选 `cover_source` 记来源描述（Bing copyright / picsum seed，用于溯源/版权标注）。SKILL.md「图片与视觉」「输出与存放」节、模板 frontmatter / 氛围图注释 / 自查清单同步，并加**硬约束**：`cover` 必须是 http(s):// 开头图片直链，❌ 严禁 `Bing 每日一图 · …` 文字描述（落盘前自检 `cover` 以 http 开头）。顺手修正模板示例出处块停留在 v1.2.8 的过期版本号。
+- **新增 `category` 字段（单一主分类）+ `tags` 改用泛化技术标签**：`category` 单选技术大类（人工智能 / 大模型 / 机器学习 / 深度学习 / NLP / 计算机视觉 / 多模态 / 强化学习 / RAG / Agent / 智能文档 / 知识图谱），`tags` 选 2-4 个泛化标签（LLM / AIGC / 人工智能 / 智能文档 等）——不造 ExtractBench、某模型代号这类论文专属细标签（只进标题与正文）。推荐清单写在 SKILL.md「输出与存放」节，模板 frontmatter 与自查清单同步加校验条。
+- **措辞稳重化：「一句话带走」→「一句话总结」、「冷静一下」→「理性看待」**：原措辞偏口语随意。TL;DR 引导词改「一句话总结」（保留"一句话"的轻量感，"总结"比"带走"稳重）；caveat 节标题改「理性看待」（承接"让读者别上头"的本意，比"冷静一下"正式，仍贴合博客风格）。SKILL.md「结构」节、模板顶部注释 / TL;DR 占位 / caveat 节标题 / 结尾节标题同步。
+
+### Fixed
+- **回溯修正 `outputs/lusca-paper-blog/` 下 9 篇旧产出的 frontmatter**（旧规则生成，cover 曾是文字描述、缺 `category`、tags 为论文专属细标签）：cover 改为真实图片直链——8 篇「穴鸮/非斯」对应 Bing API 实际 URL，extractbench 原无 cover 补 `picsum.photos/seed/extractbench`；补 `category`（大模型 / 智能文档 / Agent / 多模态）、`cover_source`（原文字描述）、`cover_backup`（imgs/ 已有备份的 8 篇）；tags 从 `document-parsing`/`vlm`/`ocr` 等细标签改为 `LLM`/`深度学习`/`智能文档`/`多模态`/`RAG` 等泛化标签；正文「一句话带走」→「一句话总结」、「冷静一下」→「理性看待」同步（含 2 处正文引用节名处）。
+
+## [1.3.0] - 2026-08-06
+
+### Changed
+- **外部氛围图：同一天不固定同一张 + 外链保留并本地备份**：Bing 每日一图从 `n=1`（只取今日一张，篇篇撞图）改为 `n=8` 取最近 8 天候选池、用 `hash(slug) % len` 按 slug 挑一张；picsum 备选的 seed 改用 slug（不再用固定字面量）——不同博客 slug 不同即拿到不同图、同一博客 re-run 稳定。氛围图在正文**直接用外链 URL**（远程即看即载，不换本地路径），**同时下载一份到 `imgs/cover.<ext>` 做备份**（外链失效兜底）；frontmatter 新增 `cover_url`（外链）与 `cover_backup`（本地备份），`cover` 仍记来源描述。SKILL.md「图片与视觉」节、模板 frontmatter / 氛围图示例 / 顶部注释 / 自查清单同步。
+
 ## [1.2.8] - 2026-08-04
 
 ### Fixed
