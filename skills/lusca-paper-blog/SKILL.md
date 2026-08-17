@@ -7,7 +7,7 @@ description: >-
   绝不编造论文未说的内容，公式只讲用途不讲推导。用户提到把论文写成博客、论文科普、通俗解读这篇论文、
   博客化分析、写公众号文章解读论文、给同行讲讲这篇论文、论文故事化、深入浅出讲一下这篇、
   paper to blog、explain this paper、paper explainer 时使用本技能。
-version: "1.5.0"
+version: "1.7.1"
 author: lusca
 user-invocable: true
 argument-hint: "[parse 结果 / 精读笔记 / 论文地址 / arXiv ID / URL / PDF / 粘贴文本]"
@@ -151,12 +151,13 @@ locate-source → read-or-reuse → outline-blog → write-blog → polish-tone 
 
 两类图分工，"一张"只约束外部氛围图，不约束论文原图：
 
-- **外部氛围图只要一张（开头）**：默认 Bing 每日一图（取不到降级 picsum.photos），放 H1 后正文最开头，**无下方 caption**。**正文里直接用外链 URL**（不换成本地路径，远程即看即载），**同时下载一份到 `imgs/cover.<ext>` 做备份**（外链失效时兜底）；外链 URL、本地备份、来源描述记 frontmatter（`cover` 记外链 URL、`cover_backup` 记本地路径、`cover_source` 记来源）。全篇只这一张外部图，不再多处点缀
+- **外部氛围图只要一张（开头）**：**跑 `scripts/fetch_cover.py` 获取**（禁止手选——手选会反复取同一张），放 H1 后正文最开头，**无下方 caption**。脚本合并 Bing 每日一图池（≈ 15 张）与 picsum.photos 全量池（≈ 300 张）为候选，用持久化登记文件（`~/.cache/lusca-skill/lusca-paper-blog/used_covers.json`，跨项目跨会话）记录已用过的图，**每次只从没用过的里选**——两池全用完才清空登记重新循环，保证跨文章长期不重复；离线取不到时退化为带唯一 seed 的 picsum 直链。正文直接用脚本返回的外链 URL，脚本同时下载备份到 `imgs/cover.jpg`。全篇只这一张外部图，不再多处点缀
 - **论文原图该嵌就嵌（不限张数）**：结果图、架构图、pipeline 图等承载事实的论文图，转存到 `imgs/` 嵌入正文，**配一句白话 caption**（解释图说明什么、读者该看什么），**严禁只写文字路径**——这是事实层，和氛围图不是一回事，别因为"一张图"就删掉
-- **两种外部图来源，默认 Bing——同一天不要固定同一张**：两种来源都用 **slug 做差异化因子**（不同博客 slug 不同 → 拿到不同图；同一篇 re-run 稳定不乱换），避免同一天所有博客都撞同一张：
-  - **Bing 每日一图（默认）**：`https://cn.bing.com/HPImageArchive.aspx?format=js&idx=0&n=8&mkt=zh-CN` 一次取**最近 8 天的候选池**（`n=8`，不是只取今日一张），用 `hash(slug) % len(images)` 从池里挑一张（不要总取 `images[0]`）；外链 = `https://cn.bing.com` + `image.url`，`image.copyright` 记入 frontmatter `cover_source`；加 `User-Agent` 头下载；艺术感强
-  - **picsum.photos（备选/降级）**：`https://picsum.photos/seed/<slug>/<w>/<h>`——**seed 用 slug**（别用固定字面量，否则篇篇撞图），Unsplash 艺术摄影、免费商用、稳定；Bing 取不到时降级
-- **外链保留 + 本地备份**：氛围图在正文用**外链 URL** 嵌入（远程可访问、即看即载，不要替换成本地 `imgs/` 路径），同时把外链 `curl` 下载到 `imgs/cover.<ext>` 存档（外链失效时不至于开天窗）；frontmatter `cover` 记**外链 URL**（正文实际引用的图片地址）、`cover_backup` 记本地备份相对路径、`cover_source` 记来源描述（`Bing 每日一图 · <copyright>` 或 `picsum · seed=<slug>`，用于溯源/版权标注）
+- **封面图获取脚本用法（必跑）**：
+  ```bash
+  python3 skills/lusca-paper-blog/scripts/fetch_cover.py <slug> <YYYYMMDDHHmmss> outputs/lusca-paper-blog/<slug>/
+  ```
+  输出 JSON `{"url": "...", "backup": "imgs/cover.jpg", "source": "..."}` → `url` 用于正文 `![氛围图](url)` + frontmatter `cover`（必须 http 开头）；`backup` → frontmatter `cover_backup`；`source` → frontmatter `cover_source`
 - **emoji 适当点缀，不堆砌**：资源块每条配平台 emoji（📄 论文 / 💻 代码 / 🧩 模型 / 📊 数据集 / 🎮 Demo）；正文也适当加——H2 小标题配一个语义 emoji（如 🎯🛠️📈🤔🧊💡）、列表关键词配相关 emoji（如 🎓 学、🔁 迭代、📋 表格、➗ 公式）；约束：数字/基准结果/caveat 严肃处不加、语义相关不重复、不每句都加
 
 ### 项目资源块：前面就给链接，方便动手
@@ -187,7 +188,7 @@ locate-source → read-or-reuse → outline-blog → write-blog → polish-tone 
 - **文末出处块**（遵 CLAUDE.md「文档输出规范」，三行）：
   ```
   > 作者：lusca
-  > 版本：lusca-paper-blog v1.5.0
+  > 版本：lusca-paper-blog v1.7.1
   > 出处：https://github.com/yjmm10/lusca-skill/tree/main/skills/lusca-paper-blog
   ```
 - **段落不硬换行**：遵 CLAUDE.md——正文段落与列表项在源码里写在一行，段间空行分隔，不在句中按列宽折行
@@ -208,9 +209,10 @@ locate-source → read-or-reuse → outline-blog → write-blog → polish-tone 
 
 ## Reference 文件索引
 
-| 文件 | 何时 Read |
+| 文件 | 何时 Read / Run |
 |------|-----------|
 | `assets/blog-template.md` | 落盘前必读：博客结构骨架 + 5 种标题范式 + frontmatter + 各节字数指导 |
+| `scripts/fetch_cover.py` | 获取封面图时**必跑**（禁止手选）：从 Bing + picsum 合并池选**没用过**的图（登记去重，跨文章不重复） |
 
 ---
 

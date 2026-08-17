@@ -2,6 +2,21 @@
 
 所有版本变更记录。版本号规则：MAJOR（流程/输出规范 breaking）/ MINOR（新节、新范式、新 reference）/ PATCH（措辞、typo）。
 
+## [1.7.1] - 2026-08-17
+
+### Fixed
+- **回溯修正 `outputs/lusca-paper-blog/` 下 9 篇旧产出的封面/首图不一致**（v1.2.x–v1.3.0 时代生成，早于 v1.4.0 的外链规范）：8 篇正文首图用的是本地路径 `imgs/cover.jpg` 而非 frontmatter `cover` 的外链 URL（封面与首图不一致、且非链接形式），统一改为各自 frontmatter `cover` 的同一外链 URL（本地备份不动，`cover_backup` 已在前置条目补齐）；extractbench 篇正文缺氛围图且无 `cover_backup`，在 H1 后补插 `![氛围图](https://picsum.photos/seed/extractbench/1200/600)`、frontmatter 补 `cover_backup`、下载备份到 `imgs/cover.jpg`。修复后全量自检：所有博客 `cover` == 正文首图 == http(s) 外链、`cover_backup` 齐全、check_imgs.py 无孤儿图。顺手：2407/flashattention-3 补嵌历史漏嵌的 `fig6b_fp16_bwd_hd128.jpg`（FP16 后向图，补在 fig5e 图组后）；SKILL.md 与模板文末出处块示例的过期版本号 v1.6.0 同步为 v1.7.1。
+
+## [1.7.0] - 2026-08-14
+
+### Fixed
+- **封面图 1–2 天内重复修复：`fetch_cover.py` 改为登记去重版**。v1.6.0 用 slug+timestamp 做 MD5 种子从 Bing 候选池选图，但实测该池只有 ≈ 15 张 unique（HPImageArchive idx=0..7 去重后仍是 15，池子扩不大），15 张里哈希撞图概率天然高。改为：合并 Bing 池（≈ 15 张）+ picsum.photos 全量池（`v2/list` 前 3 页 ≈ 300 张）为候选，用持久化登记文件 `~/.cache/lusca-skill/lusca-paper-blog/used_covers.json`（用户级缓存，跨项目跨会话）记录已用图，**每次只从没用过的候选里按种子选**，两池全用完才清空登记循环；离线全取不到退化为带唯一 seed 的 picsum 直链（同 v1.6.0）。登记含 slug 与日期、可人工审计，写失败不影响出图。SKILL.md「图片与视觉」节与 Reference 索引同步。
+
+## [1.6.0] - 2026-08-12
+
+### Fixed
+- **封面图重复修复：新增 `scripts/fetch_cover.py` 脚本，禁止手选**。根因是 AI 执行时跳过 `hash(slug) % len(images)` 逻辑、直接取 `images[0]`，导致同一天所有博客撞同一张 Bing 图。脚本用 **slug + 时间戳** 做种子（每次运行时间戳不同 → 每次拿到不同图），从 Bing 候选池（idx=0 + idx=7 合并去重 ≈ 15 张）按 MD5 哈希选图，取不到降级 picsum.photos（seed 同用 slug+timestamp）；自动下载备份到 `imgs/cover.jpg`，输出 JSON（url/backup/source）。SKILL.md「图片与视觉」节改为**必跑脚本、禁止手选**，移除手动的 Bing/picsum URL 构造指令（全由脚本处理）；模板氛围图注释、自查清单、Reference 索引同步。
+
 ## [1.5.0] - 2026-08-07
 
 ### Added

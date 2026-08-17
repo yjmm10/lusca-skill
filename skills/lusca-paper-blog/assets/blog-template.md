@@ -41,9 +41,9 @@ cover_source: "<可选：图片来源描述，如 Bing 每日一图 · <copyrigh
 <!--    例："做 RAG 的人该看看 ExtractBench：你的文档解析可能正丢一半数据" -->
 <!-- 选标题时：用关键词/简称（ExtractBench、Mamba、CRISPR-Kids），不塞完整冗长标题；钩子只选一个，要戳"这可能和我有关" -->
 
-<!-- 开头氛围图：放 H1 后，一张即可、无下方 caption；默认 Bing 每日一图（n=8 候选池里按 slug 哈希挑一张，别老撞同一张），取不到降级 picsum.photos（seed 用 slug） -->
-<!-- 正文直接用外链 URL（不换本地路径，远程即看即载），同时下载一份到 imgs/cover.<ext> 做备份（外链失效兜底）；外链 URL/备份/来源记 frontmatter cover（外链 URL）/ cover_backup / cover_source -->
-![氛围图](<外链 URL：https://cn.bing.com/th?id=... 或 https://picsum.photos/seed/<slug>/1200/600>)
+<!-- 开头氛围图：放 H1 后，一张即可、无下方 caption；跑 scripts/fetch_cover.py 获取（slug+timestamp 种子，每次不同），禁止手选 -->
+<!-- 脚本输出 JSON 的 url → 正文外链 + frontmatter cover；backup → cover_backup；source → cover_source -->
+![氛围图](<脚本返回的外链 URL>)
 
 <!-- 💡 一句话总结（TL;DR）：放氛围图后、导语前，引用块给核心结论，让读者一眼判断要不要读下去；结尾不再重复 -->
 > 💡 **一句话总结**：<1-2 句核心结论——用什么方法解决什么问题、对谁有用、值不值得读>
@@ -97,7 +97,7 @@ cover_source: "<可选：图片来源描述，如 Bing 每日一图 · <copyrigh
 <!-- 已移到开头作 TL;DR（见氛围图后）；结尾不再重复，避免首尾冗余。 -->
 
 > 作者：lusca
-> 版本：lusca-paper-blog v1.5.0
+> 版本：lusca-paper-blog v1.7.1
 > 出处：https://github.com/yjmm10/lusca-skill/tree/main/skills/lusca-paper-blog
 
 <!-- ============================================================ -->
@@ -121,6 +121,6 @@ cover_source: "<可选：图片来源描述，如 Bing 每日一图 · <copyrigh
 <!-- [ ] emoji 适当点缀（资源块平台 + H2 语义 + 列表关键词），数字/caveat 不加，不堆砌 -->
 <!-- [ ] caveat 诚实但不扫兴 -->
 <!-- [ ] 篇幅 3500-6500 字 -->
-<!-- [ ] 开头一张氛围图（Bing 默认 n=8 按 slug 选 / picsum 备选 seed 用 slug），无 caption；正文用外链 URL + 下载备份到 imgs/，frontmatter cover（**必须 http(s):// 图片直链，不是文字描述**）/cover_backup/cover_source 齐全 -->
+<!-- [ ] 开头一张氛围图（跑 scripts/fetch_cover.py 用 slug+timestamp 种子获取，禁止手选），无 caption；正文用脚本返回外链 URL + 备份已下载到 imgs/，frontmatter cover（**必须 http(s):// 图片直链，不是文字描述**）/cover_backup/cover_source 齐全 -->
 <!-- [ ] frontmatter 齐全（含 category 单一主分类 + tags 2-4 个泛化技术标签，不造论文专属细标签）+ 文末三行出处块 -->
 <!-- [ ] 论文事实忠于原文，未编造；不确定标 (uncertain) -->

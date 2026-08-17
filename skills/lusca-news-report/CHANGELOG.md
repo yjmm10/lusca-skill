@@ -2,6 +2,16 @@
 
 本文件记录 lusca-news-report 的版本演进。版本号规则见 `SKILL.md`「版本管理」。
 
+## [1.1.0] — 2026-08-12
+
+### Added
+- **多平台采集新增「图片采集」——让报告"有图有真相"**。原报告纯文字，现在采集时同步收集四类关键图片：官方截图（公告/声明/发布会 PPT）、数据图表（评分/性能/舆情趋势）、事件产品照片、社交高赞反应截图（模糊隐私）。获取方式：WebFetch 内容中留意图片 URL，或 `curl -sL "<url>" | grep -oiP '<img[^>]+src="\K[^"]+"'` 扫页面图片地址再下载。嵌入配事实性 caption + 来源索引交叉引用，无图不硬凑。SKILL.md「多平台采集」节加「图片采集」子节，`references/platforms.md` 加各渠道重点图片类型表。
+- **报告与博文新增封面图**。报告标题后、博文正文开头放一张事件氛围图——优先用采集中最代表性的实拍/截图；无合适图时用 picsum.photos（`seed=<slug>-<timestamp>`，每次不同）。报告模板、博文模板加封面图占位与注释；SKILL.md「输出与存放」frontmatter 加 `cover` 字段、目录结构 `imgs/` 描述更新。
+
+### Changed
+- `assets/report-template.md` 在背景、官方反应等节加内嵌图片占位（配事实性 caption 注释）。
+- `assets/blog-post-template.md` 封面图注释更新（seed 用 slug+timestamp），"这事到底怎么回事"节加事件图占位。
+
 ## [1.0.0] — 2026-08-04
 
 ### Added

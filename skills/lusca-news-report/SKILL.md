@@ -7,7 +7,7 @@ description: >-
   用户提到追某个新闻、查事件来龙去脉、新闻调研、热点事件复盘、整理这个事的资讯、各大平台怎么看、新闻汇总、
   帮我扒一下 XX、XX 怎么回事、event report、news dive、news research 时务必使用本技能——
   哪怕用户只丢一句"帮我看看 XX 这件事"，只要意图是了解一个真实事件的来龙去脉与各方反应，就走本技能。
-version: "1.0.0"
+version: "1.1.0"
 author: lusca
 user-invocable: true
 argument-hint: "[新闻事件 / 主题 / 关键词 / 链接]"
@@ -104,6 +104,19 @@ intake → 核验(确认门) → 多平台采集 → 整合分析 → 完整报�
 - **官方答复要溯源**：引用官方声明尽量给可点击出处（公告链接 / 微博链接 / 截图说明），让读者可追溯
 - **平台覆盖按事件相关性裁剪**：技术事件重 HN / Reddit / V2EX / 知乎；消费事件重 小红书 / 电商 / 应用商店；政策事件重 权威媒体 / 官方——不必每件事都扫全平台，但要在报告里说明"扫了哪些、没扫哪些、为什么"
 
+### 图片采集（与文字并行，让报告"有图有真相"）
+
+纯文字报告读起来干，且官方截图/数据图本身就是证据。多平台采集时**同步收集关键图片**：
+
+- **优先采集的图类型**：
+  - 📋 **官方截图**：公告、声明、致歉信、发布会 PPT（证明"官方确实说了这些"）
+  - 📊 **数据图表**：评分分布、性能对比、舆情趋势（让数字可视化）
+  - 🖼️ **事件/产品照片**：事件现场、产品界面、发布会照片（让读者"看到"事件）
+  - 💬 **社交高赞反应**：高赞评论/帖子截图（作舆论切面证据；**模糊个人头像/ID 保护隐私**）
+- **怎么获取**：WebFetch 返回内容中注意图片 URL；若需提取页面全部图片，用 `curl -sL "<url>" | grep -oiP '<img[^>]+src="\K[^"]+"'` 扫出图片地址，挑相关的 `curl -L -o imgs/<descriptive-name>.<ext> "<img-url>"` 下载到 `imgs/`
+- **嵌入规则**：每张图配**事实性 caption**（"图：X 官方公告截图，来源：[链接] / [序号]"），与来源索引交叉引用；**只下载页面真实存在的图片 URL，绝不编造图片地址**；某节无图可采不硬凑，留文字即可
+- **封面图**：报告标题后（博文版正文开头）放一张事件氛围图——优先用采集中最代表性的实拍/截图；无合适图时用 picsum.photos（`seed=<slug>-<timestamp>`，每次不同）：`curl -L -o imgs/cover.jpg "https://picsum.photos/seed/<slug>-<timestamp>/1200/600"`
+
 ---
 
 ## 完整报告（核心准则）
@@ -146,10 +159,10 @@ intake → 核验(确认门) → 多平台采集 → 整合分析 → 完整报�
   outputs/lusca-news-report/{slug}/
     ├── {YYYYMMDDHHmmss}_{slug}.md          # 完整事件报告
     ├── {YYYYMMDDHHmmss}_{slug}_blog.md     # 博文版（可选）
-    └── imgs/                                # 关键截图（官方公告 / 数据图等，可选）
+    └── imgs/                                # 关键截图（官方公告 / 数据图 / 社交反应 / 封面图）
   ```
 - **slug**：取自事件简称（kebab-case）
-- **frontmatter**：`title` / `event`（事件全称）/ `subject`（主题标签）/ `time_range` / `platforms`（扫过的渠道）/ `generated_at` / `generator`（本技能名与版本）/ `uncertain_count`（uncertain 条目数）
+- **frontmatter**：`title` / `event`（事件全称）/ `subject`（主题标签）/ `time_range` / `platforms`（扫过的渠道）/ `generated_at` / `generator`（本技能名与版本）/ `uncertain_count`（uncertain 条目数）/ `cover`（可选，封面图 URL）
 - **文末出处块**（遵 CLAUDE.md「文档输出规范」，三行）：
   ```
   > 作者：lusca
