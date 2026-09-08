@@ -96,9 +96,7 @@ cover_source: "<可选：图片来源描述，如 Bing 每日一图 · <copyrigh
 
 <!-- 已移到开头作 TL;DR（见氛围图后）；结尾不再重复，避免首尾冗余。 -->
 
-> 作者：lusca
-> 版本：lusca-paper-blog v1.7.1
-> 出处：https://github.com/yjmm10/lusca-skill/tree/main/skills/lusca-paper-blog
+<!-- 注意：结尾不带任何仓库/skill 内部信息（作者/版本/出处三行）——全仓已废除出处块，发布物保持自解耦。 -->
 
 <!-- ============================================================ -->
 <!-- 自查清单（落盘前过一遍）-->
@@ -122,5 +120,6 @@ cover_source: "<可选：图片来源描述，如 Bing 每日一图 · <copyrigh
 <!-- [ ] caveat 诚实但不扫兴 -->
 <!-- [ ] 篇幅 3500-6500 字 -->
 <!-- [ ] 开头一张氛围图（跑 scripts/fetch_cover.py 用 slug+timestamp 种子获取，禁止手选），无 caption；正文用脚本返回外链 URL + 备份已下载到 imgs/，frontmatter cover（**必须 http(s):// 图片直链，不是文字描述**）/cover_backup/cover_source 齐全 -->
-<!-- [ ] frontmatter 齐全（含 category 单一主分类 + tags 2-4 个泛化技术标签，不造论文专属细标签）+ 文末三行出处块 -->
+<!-- [ ] frontmatter 齐全（含 category 单一主分类 + tags 2-4 个泛化技术标签，不造论文专属细标签） -->
+<!-- [ ] 全文无仓库/skill 内部信息：结尾不带三行出处块（作者/版本/出处） -->
 <!-- [ ] 论文事实忠于原文，未编造；不确定标 (uncertain) -->

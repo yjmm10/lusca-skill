@@ -41,16 +41,6 @@ link 脚本幂等；实体目录冲突会**报错不覆盖**；`--dry-run` 可�
 
 skill 产出的 markdown 文档（阅读笔记、检索导览、反省记录等落盘文件，以及正文里粘贴的 md 片段）统一遵守：
 
-- **文末出处块**：正文结尾附**三行引用块**，三要素齐全（每行一个要素），取自当前 skill 的 `SKILL.md` frontmatter：
-  - **作者** — `author`（项目默认 `lusca`，主页 https://github.com/yjmm10 ）
-  - **版本** — `version`
-  - **出处（含链接）** — `https://github.com/yjmm10/lusca-skill/tree/main/skills/<name>`
-  - 形如（三行，每行以 `>` 开头）：
-    ```
-    > 作者：lusca
-    > 版本：lusca-paper-read v1.9.0
-    > 出处：https://github.com/yjmm10/lusca-skill/tree/main/skills/lusca-paper-read
-    ```
 - **frontmatter 保留**：处理带 frontmatter 的 md（读入、基于模板生成、引用片段）时**保留其 frontmatter**，不剥离；仅按需在原 frontmatter 上补字段，不重写已有字段。
 - **段落内不硬换行（一段一行）**：正文段落与每个列表项在源码里**写在一行**，不在句中按列宽折行（例：不要写到"…线性注意力经"就断行、下一行接"Kimi Linear 发展为…"）；段落之间用空行分隔，列表项每个 item 一行。硬换行会让源码与部分渲染器把同一段看成多段（视觉换段）、可读性差。语义上该拆的拆成列表 / 分段，语义连贯的一段就写在一行——二者都不靠句中折行。
 

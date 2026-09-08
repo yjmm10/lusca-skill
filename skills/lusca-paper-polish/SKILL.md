@@ -5,7 +5,7 @@ description: >-
   中译英改写到可投稿质量。绝不臆造数据/引用/论断；任何可能改变科学含义的
   改动一律标注待作者确认。用户提到润色、改措辞、去 AI 味、中转英投稿、
   这话是不是说大了、polish my paper、tone down 时使用本技能。
-version: "1.10.1"
+version: "1.10.2"
 author: lusca
 user-invocable: true
 argument-hint: "[稿件文件路径 / 粘贴文本 / 段落]"
@@ -278,13 +278,7 @@ appears to）给推测。完整动词阶梯与替代表达见 `references/academ
 - **frontmatter**：`source` / `source_version` / `polished_sections`（已润色节清单，随次追加）/
   `output_language` / `created_at` / `last_updated` / `generator`。润色整篇带 frontmatter 的原稿时，
   另在其落盘稿保留原 frontmatter 字段（不剥离、不重写已有字段）。
-- **不污染作者原稿**：绝不就地改作者文件、绝不在论文正文里追加本 skill 的出处块；出处块只加在
-  polish 自己落盘的产出文档结尾（遵 CLAUDE.md「文档输出规范」，三行、每行一个要素）：
-  ```
-  > 作者：lusca
-  > 版本：lusca-paper-polish v<version>
-  > 出处：https://github.com/yjmm10/lusca-skill/tree/main/skills/lusca-paper-polish
-  ```
+- **不污染作者原稿**：绝不就地改作者文件，不在论文正文或 polish 落盘产出里追加本 skill 的出处块/仓库信息（全仓已废除文末出处块规范）
 - **润色产出不得残留本地仓库/代码位置**（自解耦原则）：落盘的润色稿——尤其可投稿的干净定稿——
   必须自解耦，不依赖本地数据/代码即可独立阅读与投稿。扫描并清除一切本地痕迹：本地文件路径
   （`results/*.json`、`src/...`、`/code/...`、`/home/...`）、本地文件名引用、指向本地的开发元
@@ -327,8 +321,7 @@ appears to）给推测。完整动词阶梯与替代表达见 `references/academ
 - **默认轻手**：能小改不大改、能不改不改；结构重写要先征得作者同意。
 - **不替代审稿**：只改语言；逻辑断裂或核心 claim 存疑时如实说，建议重写或自查，不替作者
   辩护。
-- **不污染作者稿件**：润色稿是作者原稿，不加本 skill 出处块；出处块仅加在 polish 自己另行
-  产出的报告文档上。
+- **不污染作者稿件**：润色稿是作者原稿，polish 的任何产出（润色稿与报告）都不加出处块/仓库信息。
 - **交付精简**：不内联重复完整润色稿；只给路径/改动要点 + 待确认项。
 - **润色产出自解耦**：final/落盘稿不得含本地仓库或代码位置（本地路径、文件名、开发元字段），
   图表路径除外；遇占位符要告知用户、补全后及时清理。本地代码仓库本身不动。

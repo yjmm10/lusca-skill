@@ -81,9 +81,6 @@ cover_source: "<可选：图片来源描述，如 Bing 每日一图 · <copyrigh
 
 ---
 
-> 作者：lusca
-> 版本：lusca-report-blog v<version>
-> 出处：https://github.com/yjmm10/lusca-skill/tree/main/skills/lusca-report-blog
 
 <!-- ============================================================ -->
 <!-- 标题范式（写之前选一种：报告关键词/事件名/产品名 + 单个钩子；别堆，别塞冗长全标题）-->
@@ -120,4 +117,4 @@ cover_source: "<可选：图片来源描述，如 Bing 每日一图 · <copyrigh
 <!-- [ ] 每段 ≤ 4-5 行，长段已拆；并列 ≥3 已列表化；段间有承接 -->
 <!-- [ ] 一句话总结放开头（氛围图后）作 TL;DR，结尾不重复 -->
 <!-- [ ] emoji 适当点缀，数字/caveat 不加，不堆砌 -->
-<!-- [ ] 篇幅 2000-4500 字；frontmatter 齐全（含 abstract ≤200 字 + cover 为 http(s):// 图片直链 + cover_source）+ 文末三行出处块；段落一段一行 -->
+<!-- [ ] 篇幅 2000-4500 字；frontmatter 齐全（含 abstract ≤200 字 + cover 为 http(s):// 图片直链 + cover_source）；段落一段一行 -->

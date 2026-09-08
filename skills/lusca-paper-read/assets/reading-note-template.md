@@ -168,6 +168,3 @@ flowchart LR
 
 **[推荐深读 / 选读 / 跳过]** — [一句理由]
 
-> 作者：lusca
-> 版本：lusca-paper-read v<version>
-> 出处：https://github.com/yjmm10/lusca-skill/tree/main/skills/lusca-paper-read

@@ -3,6 +3,11 @@
 所有 notable 变更记于此。版本号规则：MAJOR（流程/输出规范 breaking）/ MINOR（新 reference、
 新指导）/ PATCH（措辞、typo）。
 
+## [1.10.2] - 2026-09-08
+
+### Removed
+- **不再追加出处块**：polish 落盘产出结尾不再附三行出处块；「不污染作者原稿」条目改写为不向论文正文或 polish 产出追加任何仓库/skill 信息（CLAUDE.md 已全局废除文末出处块规范）。
+
 ## [1.10.1] — 2026-07-31
 
 ### Changed

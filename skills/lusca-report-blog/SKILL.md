@@ -10,7 +10,7 @@ description: >-
   报告路径，本地文件除 imgs 外不引用，末尾"参考来源"（供查证）而非"关键来源"（论证证据）。绝不编造，不确定标 uncertain。
   用户提到把报告写成博客、报告通俗化、报告解读、调研报告转博文、事件报告转公众号、这份报告讲成故事、
   report to blog、blog this report 时务必使用本技能——只要输入是一份"报告"而非"论文"，且要通俗化发布，就走本技能。
-version: "1.5.0"
+version: "1.5.1"
 author: lusca
 user-invocable: true
 argument-hint: "[报告.md / 报告目录 / 粘贴文本]"
@@ -77,7 +77,7 @@ locate → read → select → outline → write → polish → save
 3. **搭骨架**：`Read` `assets/report-blog-template.md`，对照模板规划各节。**以"说清楚 + 交付价值"为纲**：围绕**读者想知道/该知道的**组织（不是围绕报告结构）；节怎么分服从于把事情讲明白（综合叙述或按视角组织皆可）；**不设**"我怎么看""时间线"这类节（见 §总纲）；澄清 inline 在关键处；时间线折进正文一句或省。选活泼标题（报告关键词 + 钩子）
 4. **写博客**：按节逐段写，遵循「核心准则」——价值导向、通俗、深入浅出、行业共鸣、互动语气、**澄清式作者在场**、篇幅、段落控制
 5. **润色语气**：通读——删官样腔与凑数段（每段都该有知识增量）、补自问自答与打趣（点缀别过密）、拆长段、确认每段 ≤4-5 行、确认没有"我怎么看/时间线"节、确认没有本地报告路径、确认末尾是"参考来源"
-6. **落盘**：写到 `./outputs/lusca-report-blog/{slug}/{YYYYMMDDHHmmss}_{slug}.md`，图**复制**到 `{slug}/imgs/`；带 frontmatter；**文末出处块**三行
+6. **落盘**：写到 `./outputs/lusca-report-blog/{slug}/{YYYYMMDDHHmmss}_{slug}.md`，图**复制**到 `{slug}/imgs/`；带 frontmatter
 7. **交付**：路径 + 标题 + 一句话定位；附后续衔接；**不内联重复展示完整博客**
 
 ---
@@ -212,12 +212,6 @@ locate → read → select → outline → write → polish → save
 - **frontmatter**：`title`（活泼版）/ `subtitle`（可选）/ `source_report`（原报告**标题**，不带本地路径）/ `blog_date` / `read_minutes` / `slug` / `tags` / `abstract`（≤200 字博文摘要）/ `cover`（氛围图外链 URL）/ `cover_backup`（本地备份路径）/ `cover_source`（可选，来源描述）
 - **`abstract` 是 frontmatter 的博文摘要**（≤200 字中文）：用于平台描述/SEO/列表预览，概括"报告讲了什么、说清楚后的图景、对读者意味什么"；与正文 TL;DR（一句话钩子）互补——abstract 是完整段落、TL;DR 是一句话
 - **`cover` 必须是 http(s):// 开头的图片直链**——正文实际能加载的远程图片地址，❌ 严禁填 `Bing 每日一图 · <copyright>` 或 `picsum · seed: …` 这类文字描述（文字来源描述放 `cover_source`）；落盘前自检 `cover` 以 `http` 开头
-- **文末出处块**（遵 CLAUDE.md，三行）：
-  ```
-  > 作者：lusca
-  > 版本：lusca-report-blog v<version>
-  > 出处：https://github.com/yjmm10/lusca-skill/tree/main/skills/lusca-report-blog
-  ```
 - **段落不硬换行**：正文段落与列表项写在一行，段间空行分隔
 - **交付精简**：落盘后只返回路径 + 标题 + 一句话定位，**不内联重复展示完整博客**
 

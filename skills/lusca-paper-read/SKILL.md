@@ -5,7 +5,7 @@ description: >-
   方法概要、批判性评估、可复用要点）。融合六维精读框架与多视角批判（含反方最强论证），
   立足读者视角——不是给作者的 referee report。用户提到读论文、精读这篇、帮我看看这篇论文、
   这篇讲了啥、值不值得读、paper read、read this paper 时使用本技能。
-version: "1.10.3"
+version: "1.10.4"
 author: lusca
 user-invocable: true
 argument-hint: "[论文路径 / arXiv ID / URL / 粘贴文本]"
@@ -137,12 +137,6 @@ locate → read-full → six-dim-read → critique-lenses → note → save
   （`title`/`authors`/`year`/`venue`/`arxiv`/`doi`/`read_date`/`verdict`/`slug`/`tags`），
   便于后续按 verdict / tag 检索
 - **交付精简**：落盘后只返回路径 + 一两句要点（论文定位 + verdict），**不内联重复展示完整笔记**——完整内容已写入文件，再贴一遍是冗余噪声
-- **文末出处块**：正文结尾附**三行出处**（遵 CLAUDE.md「文档输出规范」，每行一个要素）：
-  ```
-  > 作者：lusca
-  > 版本：lusca-paper-read v<version>
-  > 出处：https://github.com/yjmm10/lusca-skill/tree/main/skills/lusca-paper-read
-  ```
 
 ---
 

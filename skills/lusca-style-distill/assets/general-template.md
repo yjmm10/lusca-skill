@@ -90,9 +90,6 @@ generator: "lusca-style-distill v1.0.0"
 
 <基于上述 DNA 重写的一小段验证样本>
 
-> 作者：lusca
-> 版本：lusca-style-distill v1.0.0
-> 出处：https://github.com/yjmm10/lusca-skill/tree/main/skills/lusca-style-distill
 
 <!-- ============================================================ -->
 <!-- 自查清单（落盘前过一遍）-->
@@ -106,4 +103,4 @@ generator: "lusca-style-distill v1.0.0"
 <!-- [ ] 有反例，写出跑偏的样子 -->
 <!-- [ ] 没越界评价内容好坏（风格≠内容） -->
 <!-- [ ] 风格样本（若有）标明是重写验证，不是原文 -->
-<!-- [ ] frontmatter 齐全 + 文末三行出处块 + 段落不硬换行 -->
+<!-- [ ] frontmatter 齐全 + 段落不硬换行 -->

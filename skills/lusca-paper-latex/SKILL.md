@@ -9,7 +9,7 @@ description: >-
   生成 tex、排版成 LaTeX、论文转 LaTeX、中文稿转英文 latex、导出 tex、整理成 LaTeX、
   出一份 tex 投稿、markdown to latex、convert to tex、make it a tex paper、typeset as latex
   时使用本技能——哪怕用户只说"把这篇整理成能编译的 tex"也走本技能。
-version: "1.1.0"
+version: "1.1.1"
 author: lusca
 user-invocable: true
 argument-hint: "[润色稿文件路径 / 粘贴文本 / .tex 草稿]"
@@ -202,13 +202,6 @@ read → detect-lang → protect → (translate) → map-structure → escape �
   ```
 - **图片路径保留**：源稿引用的 `figures/*.png` 等随文交付，其相对路径在 `.tex` 里保留（`figures/arch.pdf`），便于本地直接编译；这是与「自解耦」规范的约定例外——图表路径是编译所需，不是开发痕迹。
 - **frontmatter**：`.tex` 不加 YAML frontmatter（LaTeX 无此惯例）；源稿若有 frontmatter（如 polish 产出），将其中的标题 / 作者 / 日期 / 摘要映射到 `\title` `\author` `\date` `\begin{abstract}`，不剥离、不重写已有信息。
-- **出处块（LaTeX 注释）**：`.tex` 末尾以 LaTeX 注释加出处三要素（注释不影响编译、不污染正文，投稿前可整段删除）。`.tex` 是 LaTeX 源、英文是其生态通用语，且英文注释在 pdflatex / xelatex 下都零风险——因此本 skill 的出处块默认用**英文注释**（中文 pdflatex 稿若塞中文注释可能触发 `Unicode character` 报错；仅当用户明确要中文出处、且用 xelatex + xeCJK 时才换中文）：
-  ```
-  % Typeset with lusca-paper-latex (comments; safe to delete before submission).
-  % Author: lusca
-  % Version: lusca-paper-latex v1.1.0
-  % Source: https://github.com/yjmm10/lusca-skill/tree/main/skills/lusca-paper-latex
-  ```
 - **段落不硬换行**：遵 CLAUDE.md——`.tex` 正文段落写在一行（LaTeX 本就以空行分段、忽略单换行），不在句中按列宽折行；列表项每个 `\item` 一行。
 - **交付精简**：落盘后只给路径 + 要点 + 待补项，**不内联重复完整 `.tex`**。
 
@@ -233,8 +226,7 @@ LaTeX 落盘后，按常用度排序：
 - **英文稿不润色**：英文输入只转格式，语言问题交还 polish；本技能不越界改表达。
 - **编译是必做环节**：产出必须实际编译验证（`latexmk`）；环境无 LaTeX 时按 `references/setup-latex.md`（三平台安装）引导用户，并先静态检查、如实标注"未编译、待复验"——绝不把静态检查说成已编译。
 - **绝不臆造引用**：无 `.bib` 时生成占位条目并标注待补，不编著录信息。
-- **一处目录、不就地改润色稿**：产出落在 `outputs/lusca-paper-latex/{slug}/`，作者润色稿保持不动。
-- **出处以注释形式加在 `.tex` 末尾**：不影响编译、投稿前可删。
+- **一处目录、不就地改润色稿**：产出落在 `outputs/lusca-paper-latex/{slug}/`，作者润色稿保持不动；`.tex` 不加任何出处注释/仓库信息。
 
 ## 质量底线
 

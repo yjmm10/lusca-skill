@@ -53,9 +53,6 @@ based_on: "<对应完整报告文件名，便于回溯事实层>"
 
 ---
 
-> 作者：lusca
-> 版本：lusca-news-report v<version>
-> 出处：https://github.com/yjmm10/lusca-skill/tree/main/skills/lusca-news-report
 
 <!-- ============================================================ -->
 <!-- 自查清单（落盘前过一遍）-->
@@ -69,5 +66,5 @@ based_on: "<对应完整报告文件名，便于回溯事实层>"
 <!-- [ ] 一句话带走放开头作 TL;DR -->
 <!-- [ ] 冷静一下诚实点了信息缺口/不确定 -->
 <!-- [ ] 篇幅 2000-4500 字（比报告短，比论文博客可更短） -->
-<!-- [ ] frontmatter 齐全（含 based_on 指回完整报告）+ 文末三行出处块 -->
+<!-- [ ] frontmatter 齐全（含 based_on 指回完整报告） -->
 <!-- [ ] 封面图就位（picsum seed=slug-timestamp）；如有事件图已嵌入正文 -->

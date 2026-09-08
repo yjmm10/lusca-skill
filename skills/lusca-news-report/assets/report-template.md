@@ -122,9 +122,6 @@ flowchart TD
 
 ---
 
-> 作者：lusca
-> 版本：lusca-news-report v<version>
-> 出处：https://github.com/yjmm10/lusca-skill/tree/main/skills/lusca-news-report
 
 <!-- ============================================================ -->
 <!-- 自查清单（落盘前过一遍）-->
@@ -140,4 +137,4 @@ flowchart TD
 <!-- [ ] 来源索引含可信度分级 -->
 <!-- [ ] 关键图片已采集并嵌入（官方截图/数据图/事件照），配事实性 caption；无图节不硬凑；封面图就位 -->
 <!-- [ ] 段落一段一行（不句中折行）；并列 ≥3 已列表化 -->
-<!-- [ ] frontmatter 齐全 + 文末三行出处块 -->
+<!-- [ ] frontmatter 齐全 -->

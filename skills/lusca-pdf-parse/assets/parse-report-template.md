@@ -30,8 +30,3 @@ generator: "lusca-pdf-parse@1.0.0"
 
 版面 / 表格 / 公式 / 图片还原是否正常；明显问题在此列出（表格错位、公式乱码、缺图等）；无问题写「版面还原良好」。
 
----
-
-> 作者：lusca
-> 版本：lusca-pdf-parse v<version>
-> 出处：https://github.com/yjmm10/lusca-skill/tree/main/skills/lusca-pdf-parse

@@ -2,6 +2,11 @@
 
 本文件记录 lusca-paper-latex 的变更。版本号规则：MAJOR（流程 / 输出规范 breaking）/ MINOR（新 reference、新指导、新模板）/ PATCH（措辞、typo）。
 
+## v1.1.1 — 2026-09-08
+
+### Removed
+- **LaTeX 注释出处块**：`.tex` 末尾不再追加 `% Author/Version/Source` 注释出处块，原「出处块（LaTeX 注释）」条目整条移除（CLAUDE.md 已全局废除文末出处块规范）。
+
 ## v1.1.0 — 2026-08-04
 
 ### Added

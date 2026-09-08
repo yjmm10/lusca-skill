@@ -7,7 +7,7 @@ description: >-
   用户提到追某个新闻、查事件来龙去脉、新闻调研、热点事件复盘、整理这个事的资讯、各大平台怎么看、新闻汇总、
   帮我扒一下 XX、XX 怎么回事、event report、news dive、news research 时务必使用本技能——
   哪怕用户只丢一句"帮我看看 XX 这件事"，只要意图是了解一个真实事件的来龙去脉与各方反应，就走本技能。
-version: "1.1.0"
+version: "1.1.1"
 author: lusca
 user-invocable: true
 argument-hint: "[新闻事件 / 主题 / 关键词 / 链接]"
@@ -163,12 +163,6 @@ intake → 核验(确认门) → 多平台采集 → 整合分析 → 完整报�
   ```
 - **slug**：取自事件简称（kebab-case）
 - **frontmatter**：`title` / `event`（事件全称）/ `subject`（主题标签）/ `time_range` / `platforms`（扫过的渠道）/ `generated_at` / `generator`（本技能名与版本）/ `uncertain_count`（uncertain 条目数）/ `cover`（可选，封面图 URL）
-- **文末出处块**（遵 CLAUDE.md「文档输出规范」，三行）：
-  ```
-  > 作者：lusca
-  > 版本：lusca-news-report v<version>
-  > 出处：https://github.com/yjmm10/lusca-skill/tree/main/skills/lusca-news-report
-  ```
 - **交付精简**：落盘后只返回路径 + 一两句要点（事件定位 + 最关键发现 / 不确定），**不内联重复展示完整报告**——完整内容已落盘，再贴一遍是冗余噪声
 
 ---

@@ -4,7 +4,7 @@ description: >-
   基于 lusca-paper-read 阅读笔记生成会议尺寸可编辑海报（60×36in）：提炼文案、只用以有 imgs/、
   生成 QR、固定 HTML 模板、FULL 90% 门控最多 3 轮、导出 poster.pptx。用户提到从阅读笔记做海报、
   论文海报、paper poster、出海报 pptx、/lusca-paper-poster 时使用。不替代 ResearchStudio paper2poster 全链。
-version: "0.1.0"
+version: "0.1.1"
 author: lusca
 user-invocable: true
 argument-hint: "[lusca-paper-read 笔记.md 或 slug 目录]"
@@ -49,7 +49,7 @@ resolve note → distill poster_copy.json → validate (≤2)
    - exit 0 → 进入导出  
    - 非 0 → 按 slack 报告改 `poster.html`，**累计 ≤ 3 次** gate；第 3 次仍失败则带警告继续导出
 8. **PPTX**：`export_pptx.py --html <outdir>/poster.html --out <outdir>/poster.pptx`
-9. **交付**：pptx（+ html）绝对路径；用图与 QR 说明；文末三行出处；后续衔接一句
+9. **交付**：pptx（+ html）绝对路径；用图与 QR 说明；后续衔接一句
 
 ### 画幅
 
@@ -89,10 +89,3 @@ outputs/lusca-paper-poster/{slug}/
 
 - 主交付即为海报 pptx；旁支可用 `/lusca` 复盘本技能门控/提炼问题
 
-## 文末出处（落盘 md 附录若有；对话交付可省略 md 文件）
-
-```
-> 作者：lusca
-> 版本：lusca-paper-poster v0.1.0
-> 出处：https://github.com/yjmm10/lusca-skill/tree/main/skills/lusca-paper-poster
-```

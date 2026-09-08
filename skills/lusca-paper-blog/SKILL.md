@@ -7,7 +7,7 @@ description: >-
   绝不编造论文未说的内容，公式只讲用途不讲推导。用户提到把论文写成博客、论文科普、通俗解读这篇论文、
   博客化分析、写公众号文章解读论文、给同行讲讲这篇论文、论文故事化、深入浅出讲一下这篇、
   paper to blog、explain this paper、paper explainer 时使用本技能。
-version: "1.7.1"
+version: "1.7.2"
 author: lusca
 user-invocable: true
 argument-hint: "[parse 结果 / 精读笔记 / 论文地址 / arXiv ID / URL / PDF / 粘贴文本]"
@@ -74,7 +74,7 @@ locate-source → read-or-reuse → outline-blog → write-blog → polish-tone 
 3. **搭骨架**：`Read` `assets/blog-template.md`，对照博客结构模板规划各节；从模板的**标题范式**选一个活泼标题（论文关键词/简称 + 面向开发者的钩子）
 4. **写博客**：按模板逐节写，遵循下方「核心准则」——通俗、深入浅出、行业共鸣、互动语气、篇幅、段落控制
 5. **润色语气**：通读一遍——删学术腔、补自问自答与打趣（点缀别过密）、拆长段、检查标题与小标题是否干净、确认每段不超过 4-5 行
-6. **落盘**：写到 `./outputs/lusca-paper-blog/{slug}/{YYYYMMDDHHmmss}_{slug}.md`，图片到 `{slug}/imgs/`；带 YAML frontmatter（见模板）；**文末出处块**三行（遵 CLAUDE.md）。落盘后跑 `python3 skills/lusca-paper-read/scripts/check_imgs.py outputs/lusca-paper-blog/{slug}/` 自检无孤儿图
+6. **落盘**：写到 `./outputs/lusca-paper-blog/{slug}/{YYYYMMDDHHmmss}_{slug}.md`，图片到 `{slug}/imgs/`；带 YAML frontmatter（见模板）；不带文末出处块（全仓已废除）。落盘后跑 `python3 skills/lusca-paper-read/scripts/check_imgs.py outputs/lusca-paper-blog/{slug}/` 自检无孤儿图
 7. **交付**：路径 + 标题 + 一句话定位；附后续衔接建议（见 §后续衔接）；**不内联重复展示完整博客**——已落盘，再贴一遍是冗余噪声
 
 ---
@@ -185,12 +185,7 @@ locate-source → read-or-reuse → outline-blog → write-blog → polish-tone 
   - **`tags`（多选 2-4 个，泛化）**：LLM / AIGC / 人工智能 / 机器学习 / 深度学习 / NLP / 计算机视觉 / 多模态 / 强化学习 / RAG / Agent / 智能文档 / 知识图谱 / 大模型应用 / AI 评测
 - **`cover` 必须是 http(s):// 开头的图片直链**——正文实际能加载的远程图片地址，❌ 严禁填 `Bing 每日一图 · <copyright>` 这类文字描述（文字来源描述放 `cover_source`）；落盘前自检 `cover` 以 `http` 开头，否则不合规
 - **`abstract` 是 frontmatter 的博文摘要**（≤200 字中文）：用于平台描述/SEO/列表预览，概括"论文讲了什么、核心贡献、对读者意味什么"；与正文 TL;DR（一句话钩子）互补——abstract 是完整段落、TL;DR 是一句话
-- **文末出处块**（遵 CLAUDE.md「文档输出规范」，三行）：
-  ```
-  > 作者：lusca
-  > 版本：lusca-paper-blog v1.7.1
-  > 出处：https://github.com/yjmm10/lusca-skill/tree/main/skills/lusca-paper-blog
-  ```
+- **不带文末出处块**：正文结尾**不加**任何仓库/skill 内部信息（作者/版本/出处三行）——全仓已废除文末出处块规范，产出保持自解耦、可直接发布
 - **段落不硬换行**：遵 CLAUDE.md——正文段落与列表项在源码里写在一行，段间空行分隔，不在句中按列宽折行
 
 ---

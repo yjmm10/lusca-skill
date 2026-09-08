@@ -8,7 +8,7 @@ description: >-
   没有的风格特征，每条结论都能指回原文。用户提到提取写作风格、分析作者文风、风格画像、风格
   DNA、抓一下这位作者的文风、模仿某人文风前先抓风格、writing style analysis、extract the voice、
   author voice 时使用本技能。
-version: "1.0.0"
+version: "1.0.1"
 author: lusca
 user-invocable: true
 argument-hint: "[文章文件路径 / 粘贴文本 / 多篇路径]"
@@ -89,7 +89,7 @@ locate → read-sample → genre-decide → profile → evidence-check → save
    多篇时再 `Read` `references/multi-article-merge.md` 做合并与置信度标注
 5. **佐证自检**：逐条核对"有没有原文佐证、有没有脑补、文体侧重对不对、可迁移清单是不是具体动作"
 6. **落盘**：按对应模板（`assets/general-template.md` 或 `assets/academic-template.md`）写到输出目录，
-   带前置 frontmatter 与文末出处块
+   带前置 frontmatter
 
 ---
 
@@ -160,12 +160,6 @@ Do / Don't 写**具体动作**，不写没法照做的空话。
 - **frontmatter**：`target`（作者 / 出处）/ `genre`（general / academic）/ `source_articles`（单篇 1、多篇
   N）/ `article_titles`（多篇时列出各篇）/ `sample_scope`（取样范围说明）/ `created_at` / `last_updated` /
   `generator`
-- **文末出处块**（遵 CLAUDE.md「文档输出规范」，三行）：
-  ```
-  > 作者：lusca
-  > 版本：lusca-style-distill v1.0.0
-  > 出处：https://github.com/yjmm10/lusca-skill/tree/main/skills/lusca-style-distill
-  ```
 - **段落不硬换行**：遵 CLAUDE.md——正文与列表项写在一行，段间空行分隔，不在句中按列宽折行
 
 ---
