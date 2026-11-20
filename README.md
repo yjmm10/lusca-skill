@@ -8,6 +8,7 @@ lucas-skill/
 │   ├── paper/         # 论文科研线
 │   ├── writing/       # 写作与发布线
 │   ├── research/      # 调研线
+│   ├── dev/           # 工程脚手架线
 │   └── meta/          # 元技能
 ├── .claude/skills/    # 项目级发现层（仅 symlink）→ ../../skills/<category>/<name>
 ├── scripts/
@@ -49,6 +50,12 @@ lucas-skill/
 |-------|------|
 | `lucas-news-report` | 新闻/热点事件多平台深度调研，产出带时间线的完整报告 |
 | `lucas-command-query` | 需求/想法立项前调研：竞品、开源、论文 + 可行性方案 |
+
+### 🛠️ dev — 工程脚手架线
+
+| Skill | 用途 |
+|-------|------|
+| `lucas-project-scaffold` | 新项目脚手架：命名、目录结构、README/agent 文件/logo、GitHub Pages CI/CD、前后端选型、环境参数管理、可选关于页 |
 
 ### 🧠 meta — 元技能
 

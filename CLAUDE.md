@@ -1,6 +1,6 @@
 # CLAUDE.md — lucas-skill 多 Skill 工作区
 
-本仓库维护多个 Claude Code（cc）skill。**单一源、禁止拷贝**：所有 skill 源只在仓库根 `skills/<category>/<name>/`（按类别分子目录：`paper/`、`writing/`、`research/`、`meta/`），发现层（`.claude/skills/`、`~/.claude/skills/`）一律 symlink。
+本仓库维护多个 Claude Code（cc）skill。**单一源、禁止拷贝**：所有 skill 源只在仓库根 `skills/<category>/<name>/`（按类别分子目录：`paper/`、`writing/`、`research/`、`dev/`、`meta/`），发现层（`.claude/skills/`、`~/.claude/skills/`）一律 symlink。
 
 ## 所有权
 
