@@ -1,11 +1,11 @@
-# CLAUDE.md — lusca-skill 多 Skill 工作区
+# CLAUDE.md — lucas-skill 多 Skill 工作区
 
-本仓库维护多个 Claude Code（cc）skill。**单一源、禁止拷贝**：所有 skill 源只在仓库根 `skills/<name>/`，发现层（`.claude/skills/`、`~/.claude/skills/`）一律 symlink。
+本仓库维护多个 Claude Code（cc）skill。**单一源、禁止拷贝**：所有 skill 源只在仓库根 `skills/<category>/<name>/`（按类别分子目录：`paper/`、`writing/`、`research/`、`meta/`），发现层（`.claude/skills/`、`~/.claude/skills/`）一律 symlink。
 
 ## 所有权
 
-- **可写源**：`skills/<name>/`（`SKILL.md` 必需；`prompts`/`references`/`scripts`/`assets` 可选）
-- **只读发现层**：`.claude/skills/<name>` → `../../skills/<name>`；`~/.claude/skills/<name>` → 仓库绝对路径
+- **可写源**：`skills/<category>/<name>/`（`SKILL.md` 必需；`prompts`/`references`/`scripts`/`assets` 可选）
+- **只读发现层**：`.claude/skills/<name>` → `../../skills/<category>/<name>`；`~/.claude/skills/<name>` → 仓库绝对路径
 - ❌ 禁止在 `.claude/skills/` 或 `~/.claude/skills/` 里直接编辑实体内容
 
 ## SKILL.md 精简：长内容拆文件（所有 skill 适用）
@@ -18,7 +18,7 @@ SKILL.md 是 skill 触发时**必载**的入口，保持骨架精简；较长的
   - `prompts/` — 可复用的提示片段
 - **SKILL.md 里怎么留**：核心准则 + 主流程 + 一张「Reference 文件索引」表（文件 → **何时 Read**），让 AI 一眼判断当前要不要读某个文件——索引表而非全文
 - **何时该拆**：某节展开明显拖重 SKILL.md（十几行以上的并列清单、多套并列范式、独立长模板）就拆；三五条的简短约定就地放，不必拆
-- **范式**：见 `skills/lusca-paper-polish/`——主体只讲准则与流程，`references/`（section-conventions / academic-phrasebank / ai-tone-guardrails）与 `assets/paradigms/` 装细节，SKILL.md 末尾索引表逐文件注明何时读
+- **范式**：见 `skills/paper/lucas-paper-polish/`——主体只讲准则与流程，`references/`（section-conventions / academic-phrasebank / ai-tone-guardrails）与 `assets/paradigms/` 装细节，SKILL.md 末尾索引表逐文件注明何时读
 
 ## 改 skill 后怎么生效
 
@@ -33,7 +33,7 @@ link 脚本幂等；`--dry-run` 可预览。`link-project.sh` / `link-global.sh`
 
 ## 新建 skill 清单
 
-1. `skills/<name>/SKILL.md`（frontmatter 至少 `name` + `description`；name 用小写字母/数字/连字符，与目录名一致）
+1. `skills/<category>/<name>/SKILL.md`（frontmatter 至少 `name` + `description`；name 用小写字母/数字/连字符，与目录名一致）
 2. `./scripts/link-project.sh`（挂到项目级 `.claude/skills/`）
 3. 需要 pi：一次性 `./scripts/link-pi.sh`（已配置则跳过；之后新增 skill 自动生效）
 4. 需要全局 cc：`./scripts/link-global.sh`
@@ -50,9 +50,9 @@ skill 产出的 markdown 文档（阅读笔记、检索导览、反省记录等�
 
 skill 落盘交付时，除路径 + 要点外，**附一句"后续可衔接操作"**：点明本 skill 的产出可喂给体系内哪个 skill、为什么值得接（用 `/skill-name` 形式，让用户一眼知道下一步能做什么）。
 
-论文线的主依赖链：**`lusca-paper-search`（检索）→ `lusca-pdf-parse`（解析）→ `lusca-paper-read`（精读）**；各 skill 的后续衔接**优先指向主链下一环节**，旁支（回溯扩找、复盘等）列其后、不与主链平级。
+论文线的主依赖链：**`lucas-paper-search`（检索）→ `lucas-pdf-parse`（解析）→ `lucas-paper-read`（精读）**；各 skill 的后续衔接**优先指向主链下一环节**，旁支（回溯扩找、复盘等）列其后、不与主链平级。
 
-- **具体、可执行**：写清"用什么产出 → 喂给哪个 skill → 收益"，如「如需精读批判可接着用 `/lusca-paper-read` 基于这份 Markdown 做（比直接读 PDF 更准、图不丢）」
+- **具体、可执行**：写清"用什么产出 → 喂给哪个 skill → 收益"，如「如需精读批判可接着用 `/lucas-paper-read` 基于这份 Markdown 做（比直接读 PDF 更准、图不丢）」
 - **按相关性排序，不堆砌**：只列真正顺手的 1–3 条，最常见的放第一
 - **与「执行过程精简」不矛盾**：交付是该说话的时候，后续衔接属交付内容；简短一两行，不复述产出、不展开论证
 - 各 skill 的具体衔接清单见各自 SKILL.md 的「后续衔接」节
@@ -70,7 +70,7 @@ skill 执行过程**少生成中间信息、省 token**；产出文档本身该�
 ## 调试习惯
 
 - 优先在**仓库根**启动 cc，以加载项目级 `.claude/skills/`
-- 反省产出归 `./outputs/lusca/`（gitignored，见 `skills/lusca`）
+- 反省产出归 `./outputs/lucas/`（gitignored，见 `skills/meta/lucas`）
 - 工作区设计规范见 `docs/superpowers/specs/`
 
 ## 本阶段不做

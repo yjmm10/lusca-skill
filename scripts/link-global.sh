@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 # link-global.sh — 同步到全局发现层
-#   ~/.claude/skills/<name> → <repo>/skills/<name>   （绝对路径）
+#   ~/.claude/skills/<name> → <repo>/skills/<category>/<name>   （绝对路径）
+# 递归扫描 skills/ 下所有含 SKILL.md 的目录（支持分类子目录）。
 # 幂等；支持 --dry-run；实体冲突与非本仓库链接报错不覆盖；
 # 不删除 ~/.claude/skills 里与本仓库无关的其他 skill。
 # 退出码：0 正常；1 存在未处理的冲突。
-# 设计依据：docs/superpowers/specs/2026-07-14-lusca-skill-workspace-design.md §2
+# 设计依据：docs/superpowers/specs/2026-07-14-lucas-skill-workspace-design.md §2
 set -uo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -16,20 +17,22 @@ DRY_RUN=0
 say() { printf '%s\n' "$*"; }
 err() { printf '[ERROR] %s\n' "$*" >&2; }
 
-# 收集有效 skill
+# 收集有效 skill（递归扫描），记为 "name<TAB>相对路径"
 valid=()
-shopt -s nullglob
-for d in "$SKILLS_DIR"/*/; do
-  [[ -f "${d}SKILL.md" ]] && valid+=("$(basename "$d")")
-done
+while IFS= read -r skillmd; do
+  dir="$(dirname "$skillmd")"
+  valid+=("$(basename "$dir")"$'\t'"${dir#"$REPO_ROOT"/}")
+done < <(find "$SKILLS_DIR" -type f -name SKILL.md | sort)
 
 mkdir -p "$GLOBAL_DIR"
 
 # 仅处理本仓库 valid 的 skill；不触碰与本仓库无关的全局 skill
 rc=0
-for name in "${valid[@]+"${valid[@]}"}"; do
+for entry in "${valid[@]+"${valid[@]}"}"; do
+  name="${entry%%$'\t'*}"
+  rel="${entry#*$'\t'}"
   target="$GLOBAL_DIR/$name"
-  want="$SKILLS_DIR/$name"            # 绝对路径
+  want="$REPO_ROOT/$rel"            # 绝对路径
   if [[ -L "$target" && "$(readlink "$target")" == "$want" ]]; then
     say "ok     $name"
     continue
