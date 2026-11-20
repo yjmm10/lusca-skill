@@ -1,9 +1,11 @@
 # GitHub Pages 部署工作流模板
+# 依据官方 starter-workflows（actions/starter-workflows/pages）与 GitHub Pages 官方文档。
 # 复制到 <project>/.github/workflows/deploy.yml 后按项目修改：
 #   1. triggers.branches   触发分支
 #   2. node-version / 包管理器（npm ci → pnpm install --frozen-lockfile 等）
 #   3. build 命令
 #   4. path: dist          产物目录（Vite=dist, CRA=build, Next export=out, Astro=dist）
+# 前置条件：仓库 Settings → Pages → Source 必须选「GitHub Actions」，否则部署步骤 403。
 
 name: Deploy to GitHub Pages
 
@@ -12,14 +14,17 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# Pages 部署所需的最低权限：pages: write 发布页面，id-token: write 做 OIDC 身份验证
 permissions:
   contents: read
   pages: write
   id-token: write
 
+# 同一时间只允许一个部署，避免两次 push 的部署互相覆盖。
+# 注意：生产部署不要设 cancel-in-progress: true——会打断正在进行的发布（官方模板建议 false）。
 concurrency:
   group: pages
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build:
@@ -40,6 +45,11 @@ jobs:
       - name: Build
         run: npm run build
 
+      # 配置并启用 Pages，收集部署元数据（含子路径 base path）
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      # 上传 Pages artifact：gzip 压缩 tar、≤10GB、不含符号链接、index.html 在顶层
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
@@ -54,4 +64,4 @@ jobs:
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5

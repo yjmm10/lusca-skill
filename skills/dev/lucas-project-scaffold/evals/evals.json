@@ -1,0 +1,23 @@
+{
+  "skill_name": "lucas-project-scaffold",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "帮我从零搭一个个人博客项目，要能部署到 GitHub Pages 上访问，项目叫 mind-garden，先给我几个方案选择。",
+      "expected_output": "先以选项形式确认形态（静态/文档站等）与部署方式；给出候选目录结构；生成 README.md、agent 文件、logo.svg、.github/workflows/deploy.yml；给出 tokens 文件与设计约定。",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "我要做一个待办事项的 Web 应用，前后端分离，前端想用 Vue，后端你推荐一下，仓库已经想好叫 taskflow。需要哪些环境参数也帮我规划好。",
+      "expected_output": "目录结构为 frontend/ + backend/ 分离；后端给 2-3 个框架选项及理由；生成 .env.example 与 docs/environment.md（含敏感分级，不含真实密钥）；agent 文件包含环境参数同步红线与 tokens 规范。",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "我有个想法：做一个团队周报汇总的小工具，名字还没想好，帮我起个名字并检查能不能用，然后搭好项目骨架。",
+      "expected_output": "按命名流程给 2-3 个候选名并附撞名检查结果表，由用户确认；确认后按 CLI 工具库或 Web 应用形态（视澄清结果）落地目录、README、agent 文件与基础骨架。",
+      "files": []
+    }
+  ]
+}

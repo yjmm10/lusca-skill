@@ -9,8 +9,9 @@ description: >-
   关键决策点以提供选项的方式交由用户选择，执行中发现问题随时提醒。
   用户提到新建项目、搭脚手架、项目初始化、init 一个项目、新仓库起步、项目起名、
   目录结构设计、搭 CI/CD、github pages 部署、项目模板、scaffold、bootstrap a project、
-  project starter、init project 时使用本技能。
-version: "0.1.0"
+  project starter、init project、创建一个网站/网页应用、写个官网、新开一个小工具项目、
+  甚至只是「帮我建个仓库开始写」时，都使用本技能——宁可多触发，不要漏掉。
+version: "0.2.0"
 author: lucas
 user-invocable: true
 argument-hint: "[可选：项目想法 / 需求描述 / 已定项目名]"
@@ -33,7 +34,7 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch, WebFetch
 
 ### 第 1 步：需求澄清与项目命名
 
-提炼项目定位、受众、形态（静态站 / 文档站 / 前端 SPA / 全栈 / 纯 API / CLI 工具库）。给 2-3 个候选项目名，每个附理由（含义、长度、仓库/域名可用性、区分度），选项确认。
+提炼项目定位、受众、形态（静态站 / 文档站 / 前端 SPA / 全栈 / 纯 API / CLI 工具库）。按 `references/naming-guide.md` 的流程与标准起名：发散 5-10 个 → 初筛 2-3 个 → 做撞名检查（GitHub / 包管理器 / 搜索引擎），以检查表形式给用户选项确认。
 
 **产出**：项目名 + 一句话定位 + 形态结论。
 
@@ -59,7 +60,7 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch, WebFetch
 
 ### 第 5 步：前端选型与设计统一
 
-查 `references/framework-selection.md` 前端对比表，结合用户偏好给选项确认。建立统一设计：颜色、字体、间距、圆角、阴影集中到单一 tokens 文件（如 `src/styles/tokens.css`），组件只引用 token；「改 token 即全局生效、改组件先查引用面」写入 agent 文件。
+查 `references/framework-selection.md` 前端对比表，结合用户偏好给选项确认。按 `references/design-tokens.md` 建立统一设计：颜色（基础色板 + 语义色两层）、字体、间距、圆角、阴影集中到单一 tokens 文件（如 `src/styles/tokens.css`），组件只引用语义层 token；「改 token 即全局生效、改组件先查引用面」写入 agent 文件。
 
 **产出**：框架落地（脚手架命令 / package.json）、tokens 文件、设计约定写入 agent 文件。
 
@@ -85,8 +86,10 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch, WebFetch
 
 | 文件 | 何时 Read |
 |------|-----------|
+| `references/naming-guide.md` | 第 1 步起名时：标准、流程、撞名检查表 |
 | `references/dir-structures.md` | 第 2 步设计目录结构时，按项目形态取模板 |
 | `references/framework-selection.md` | 第 5 / 6 步前端、后端技术选型时查对比表与决策提醒 |
+| `references/design-tokens.md` | 第 5 步建 tokens 文件、定设计规范时 |
 | `references/cicd-github-pages.md` | 第 4 步配置 GitHub Pages 工作流、排查部署问题时 |
 | `references/env-management.md` | 第 6 步建环境参数文件、定参数管理规则时 |
 | `references/about-page.md` | 第 7 步做关于页、处理参考页引用时 |
@@ -94,6 +97,16 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch, WebFetch
 | `assets/agent-file-template.md` | 第 3 步写 CLAUDE.md / AGENTS.md 时取骨架 |
 | `assets/logo-guide.md` | 第 3 步绘制项目 logo 时 |
 | `assets/deploy-workflow.yml` | 第 4 步直接复制改造的 GitHub Actions 模板 |
+
+## 完成前检查（全部步骤结束后过一遍）
+
+- [ ] README 快速开始的命令**实际可跑**（依赖、脚本名与 package.json / pyproject 一致）
+- [ ] agent 文件存在且包含：常用命令、环境参数红线、设计规范、变更检查清单
+- [ ] CI/CD：workflow 文件在 `.github/workflows/` 下，构建命令 / 产物目录 / 触发分支与项目一致；SPA 已处理 404 fallback 与子路径 base
+- [ ] `.env.example` 与 `docs/environment.md` 同步且不含真实密钥；`.gitignore` 覆盖 `.env`
+- [ ] 所有颜色 / 字体 / 间距均来自 tokens 文件，组件无硬编码样式值
+- [ ] logo.svg、favicon 已落盘且 README 引用路径正确
+- [ ] 每个目录都有明确职责并在 README 中说明；无用目录已裁剪
 
 ## 后续衔接
 
