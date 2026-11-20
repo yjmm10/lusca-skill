@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.3.0 — 2026-11-20
+
+全链路具体化：每步给出可直接执行/复制的命令、代码、清单与消息模板。
+
+- 新增 `references/deploy-params.md`：按部署目标（Pages / Vercel / Netlify / 云服务器）与依赖服务（数据库 / 对象存储 / 邮件 / OAuth / 支付 / 短信 / AI API）列出参数清单、**控制台获取入口、生成命令（ssh-keygen、certbot）与敏感级别/放置位置**
+- 新增 `assets/tokens-starter.css`：可直接复制的完整 tokens 起步文件（色板/语义层/字体/间距/圆角阴影层级/暗色主题/最小重置）
+- SKILL.md：第 1 步给出 6 项澄清问题清单；选项呈现格式模板；第 4/6 步接入 deploy-params；完成前检查增加部署参数三项核对
+- naming-guide：起名技巧、撞名检查具体指令（gh/npm/pip/搜索）、各生态命名格式表
+- dir-structures：通用根文件清单、.gitignore starter、静态站首日可运行 index.html、Vite 脚手架命令与生成后三件事、后端落地命令
+- framework-selection：典型场景默认推荐表、每个框架的脚手架命令、路由/状态/UI 库配套建议、版本基线
+- design-tokens：指向 tokens-starter.css、Tailwind v3/v4 映射、硬编码审计 grep 命令
+- cicd-github-pages：vite.config base 片段、pnpm/yarn 变体、SPA fallback workflow 步骤、部署后 6 步验证、故障速查表、.nojekyll 与自定义域名
+- env-management：.env.example 完整示例、zod/pydantic-settings 配置模块模板、GitHub Actions secrets 具体用法
+- about-page：简版关于页 HTML/CSS 骨架、参考页提取映射表模板
+- logo-guide：3 个完整 SVG 成品示例、favicon 引用代码、选项消息模板
+- README/agent-file 模板：徽章与在线地址、技术栈表、提交信息 type 列表与分支命名、好/坏规则写法示例
+
 ## 0.2.0 — 2026-11-20
 
 依据外部权威资料修订（anthropics/skills 技能编写规范、agents.md 开放标准、GitHub Pages 官方文档与 starter-workflows、Vite 部署指南、The Twelve-Factor App、MDN CSS 自定义属性、README 写作实践）：

@@ -1,7 +1,11 @@
 # <项目名> — Agent 指南
 
 > 放仓库根目录。文件名二选一：`AGENTS.md`（跨工具开放标准，Codex / Cursor / Gemini CLI / Aider 等均识别，Claude Code 也读）或 `CLAUDE.md`（Claude Code 专用入口）；团队统一即可，内容通用。
-> 只写「约定与红线」：agent 无法从代码里自行推断的规则、命令和禁令。目标 < 200 行；规则要具体可验证（写「缩进用 2 空格」，不写「保持代码整洁」）。
+> 只写「约定与红线」：agent 无法从代码里自行推断的规则、命令和禁令。目标 < 200 行；规则要具体可验证：
+>
+> ❌ 「保持代码整洁」 → ✅ 「缩进用 2 空格；组件 Props 用 interface 显式声明类型」
+> ❌ 「注意性能」 → ✅ 「列表渲染必须加 key；单组件超过 300 行需拆分」
+> ❌ 「环境参数要规范」 → ✅ 「新增参数当次同步 .env.example 与 docs/environment.md，缺一不许提交」
 
 ## 项目定位
 
@@ -36,7 +40,9 @@ npm run lint     # 静态检查
 
 - 提交前必须跑通 `npm run test` 与 `npm run lint`，红了不许提交
 - 修复 bug 先补一条能复现该 bug 的测试，再修
-- 提交信息格式：`<type>(<scope>): <subject>`，如 `feat(auth): add login rate limit`
+- 提交信息格式：`<type>(<scope>): <subject>`，type 取：`feat` / `fix` / `docs` / `style`(不影响代码含义的格式) / `refactor` / `perf` / `test` / `chore`
+- 示例：`feat(auth): add login rate limit`、`fix(api): handle empty page param`
+- 分支命名：功能 `feat/<短名>`，修复 `fix/<短名>`；main 上不直接 push
 - 大改动先开 Issue / 和维护者确认，再动手
 
 ## 环境参数

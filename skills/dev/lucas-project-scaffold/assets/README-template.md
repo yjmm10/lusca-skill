@@ -6,6 +6,15 @@
 
 > 一句话定位：<这个项目是什么、给谁用、解决什么问题>（README 第一屏让读者明白「为什么值得用」，再谈怎么用）
 
+<!-- 可选：徽章与在线地址（对外项目建议加，内部项目可删）
+<p align="center">
+  <img src="https://img.shields.io/badge/license-MIT-blue" alt="License">
+  <img src="https://img.shields.io/badge/node-20%2B-green" alt="Node 20+">
+  <a href="https://<user>.github.io/<repo>/"><img src="https://img.shields.io/badge/在线预览-GitHub%20Pages-4F46E5" alt="Live Demo"></a>
+</p>
+<p align="center"><a href="https://<user>.github.io/<repo>/">▶ 在线访问地址</a></p>
+-->
+
 <!-- 前端项目建议在此放截图 / 在线 Demo 链接：
 <p align="center"><img src="docs/screenshot.png" width="720" alt="界面预览"></p>
 -->
@@ -15,6 +24,15 @@
 - <特性 1>
 - <特性 2>
 - <特性 3>
+
+## 技术栈
+
+| 层 | 选型 | 版本 |
+|----|------|------|
+| 前端 | <Vue 3 / React / Astro / 原生> | <5.x> |
+| 构建 | Vite | <7.x> |
+| 后端 | <FastAPI / Express / 无> | — |
+| 部署 | GitHub Pages（Actions 自动部署） | — |
 
 ## 快速开始
 

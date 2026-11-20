@@ -11,7 +11,7 @@ description: >-
   目录结构设计、搭 CI/CD、github pages 部署、项目模板、scaffold、bootstrap a project、
   project starter、init project、创建一个网站/网页应用、写个官网、新开一个小工具项目、
   甚至只是「帮我建个仓库开始写」时，都使用本技能——宁可多触发，不要漏掉。
-version: "0.2.0"
+version: "0.3.0"
 author: lucas
 user-invocable: true
 argument-hint: "[可选：项目想法 / 需求描述 / 已定项目名]"
@@ -34,7 +34,16 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch, WebFetch
 
 ### 第 1 步：需求澄清与项目命名
 
-提炼项目定位、受众、形态（静态站 / 文档站 / 前端 SPA / 全栈 / 纯 API / CLI 工具库）。按 `references/naming-guide.md` 的流程与标准起名：发散 5-10 个 → 初筛 2-3 个 → 做撞名检查（GitHub / 包管理器 / 搜索引擎），以检查表形式给用户选项确认。
+**澄清问题清单**（用户没明说的项，按默认假设处理并在方案里声明）：
+
+1. 项目形态：静态展示站 / 文档站 / 前端 SPA / 全栈 Web / 纯 API / CLI 或工具库？
+2. 用户是谁、主要在什么设备上用（手机 / 桌面）？
+3. 要不要登录、数据库、文件上传、支付、邮件等后端能力？
+4. 部署到哪：GitHub Pages / Vercel / Netlify / 自己的服务器 / 未定？
+5. 已有技术栈偏好或团队限制吗？
+6. 项目名想好了吗？需要我起名吗？
+
+命名按 `references/naming-guide.md` 的流程与标准：发散 5-10 个 → 初筛 2-3 个 → 做撞名检查（GitHub / 包管理器 / 搜索引擎），以检查表形式给用户选项确认。
 
 **产出**：项目名 + 一句话定位 + 形态结论。
 
@@ -54,7 +63,7 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch, WebFetch
 
 ### 第 4 步：CI/CD（github.io / GitHub Pages）
 
-静态站、文档站、无后端 SPA（含静态导出）→ 直接搭 GitHub Pages 工作流：复制 `assets/deploy-workflow.yml` 到 `.github/workflows/deploy.yml`，按项目改构建命令与产物目录；排障与子路径 base、SPA 404 等坑见 `references/cicd-github-pages.md`。需要服务端运行时的项目**不硬上 Pages**，给替代方案（Vercel / Netlify / 自托管）并说明代价。
+静态站、文档站、无后端 SPA（含静态导出）→ 直接搭 GitHub Pages 工作流：复制 `assets/deploy-workflow.yml` 到 `.github/workflows/deploy.yml`，按项目改构建命令与产物目录；排障与子路径 base、SPA 404 等坑见 `references/cicd-github-pages.md`。**部署参数（域名、平台凭证、DNS 记录等）按 `references/deploy-params.md` 逐项与用户确认获取方式**。需要服务端运行时的项目**不硬上 Pages**，给替代方案（Vercel / Netlify / 自托管）并说明代价，参数清单同样查 deploy-params。
 
 **产出**：.github/workflows/deploy.yml + README 部署说明。
 
@@ -66,7 +75,7 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch, WebFetch
 
 ### 第 6 步：后端选型与环境参数管理
 
-查 `references/framework-selection.md` 后端对比表给选项确认。环境参数按 `references/env-management.md` 管理：`.env.example`（参数全集 + 注释 + 示例值，不含真实密钥）+ `docs/environment.md`（参数/用途/默认值/示例/敏感级别表）。**代码中新暴露任何环境参数，必须当次同步更新这两处**——该规则写入 agent 文件检查清单。对接口、数据模型、鉴权、部署拓扑给设计意见；发现明文密钥、参数硬编码、缺健康检查、单点依赖等问题主动反馈。
+查 `references/framework-selection.md` 后端对比表给选项确认。环境参数按 `references/env-management.md` 管理：`.env.example`（参数全集 + 注释 + 示例值，不含真实密钥）+ `docs/environment.md`（参数/用途/默认值/示例/敏感级别表）。**代码中新暴露任何环境参数，必须当次同步更新这两处**——该规则写入 agent 文件检查清单。数据库、对象存储、邮件、OAuth、支付、AI API 等第三方服务的参数去哪申请，查 `references/deploy-params.md` 第 5 节，逐项给用户获取指引。对接口、数据模型、鉴权、部署拓扑给设计意见；发现明文密钥、参数硬编码、缺健康检查、单点依赖等问题主动反馈。
 
 **产出**：后端骨架、.env.example、docs/environment.md、设计备忘。
 
@@ -78,7 +87,11 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch, WebFetch
 
 ## 与用户的交互方式
 
-- 关键分叉一律给选项：名称 / 形态 / 框架 / 部署 / 关于页，每项带一句理由与代价
+- 关键分叉一律给选项：名称 / 形态 / 框架 / 部署 / 关于页，每个选项按「**名称 + 一句适合理由 + 一句代价/注意 + 是否推荐**」格式给，例：
+  > 前端框架选哪个？
+  > 1. **Vue 3 + Vite + Element Plus**（推荐）——中后台表单表格密集，组件库覆盖面大；需要接受团队后续招人偏向 Vue
+  > 2. **React + Vite + Ant Design**——生态与招人面最广；JSX 与依赖选型自由度高，需要更强约定
+  > 3. **原生 + Vite**——零框架心智负担、产物最小；页面交互变复杂后难维护
 - 每步结束简报：做了什么 + 下一步是什么
 - 发现问题立即提醒（需求矛盾、选型风险、部署限制、参数遗漏、设计缺陷），并给修正选项
 
@@ -91,11 +104,13 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch, WebFetch
 | `references/framework-selection.md` | 第 5 / 6 步前端、后端技术选型时查对比表与决策提醒 |
 | `references/design-tokens.md` | 第 5 步建 tokens 文件、定设计规范时 |
 | `references/cicd-github-pages.md` | 第 4 步配置 GitHub Pages 工作流、排查部署问题时 |
+| `references/deploy-params.md` | 第 4 / 6 步确定部署目标后：参数清单、获取入口与放置位置 |
 | `references/env-management.md` | 第 6 步建环境参数文件、定参数管理规则时 |
 | `references/about-page.md` | 第 7 步做关于页、处理参考页引用时 |
 | `assets/README-template.md` | 第 3 步写 README 时取骨架 |
 | `assets/agent-file-template.md` | 第 3 步写 CLAUDE.md / AGENTS.md 时取骨架 |
 | `assets/logo-guide.md` | 第 3 步绘制项目 logo 时 |
+| `assets/tokens-starter.css` | 第 5 步建立 tokens 文件时直接复制改造 |
 | `assets/deploy-workflow.yml` | 第 4 步直接复制改造的 GitHub Actions 模板 |
 
 ## 完成前检查（全部步骤结束后过一遍）
@@ -104,6 +119,7 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch, WebFetch
 - [ ] agent 文件存在且包含：常用命令、环境参数红线、设计规范、变更检查清单
 - [ ] CI/CD：workflow 文件在 `.github/workflows/` 下，构建命令 / 产物目录 / 触发分支与项目一致；SPA 已处理 404 fallback 与子路径 base
 - [ ] `.env.example` 与 `docs/environment.md` 同步且不含真实密钥；`.gitignore` 覆盖 `.env`
+- [ ] 部署所需参数已逐项核对：每个参数在 `.env.example` 有行、secrets/`.env` 有值、`docs/environment.md` 有说明
 - [ ] 所有颜色 / 字体 / 间距均来自 tokens 文件，组件无硬编码样式值
 - [ ] logo.svg、favicon 已落盘且 README 引用路径正确
 - [ ] 每个目录都有明确职责并在 README 中说明；无用目录已裁剪
