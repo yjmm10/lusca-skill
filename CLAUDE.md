@@ -24,18 +24,20 @@ SKILL.md 是 skill 触发时**必载**的入口，保持骨架精简；较长的
 
 | 改动 | 操作 |
 |------|------|
-| 只改已有 SKILL.md 正文 / prompts / references | 新开一轮 cc 会话再测（改了 description 尤其要新开） |
+| 只改已有 SKILL.md 正文 / prompts / references | 新开一轮 cc / pi 会话再测（改了 description 尤其要新开） |
 | 新增 / 重命名 / 删除 skill 目录 | 先跑 `./scripts/link-project.sh`，再新开 cc |
 | 希望任意目录开 cc 都能用 | 再跑 `./scripts/link-global.sh` |
+| 希望 pi 里也能用 | 一次性跑 `./scripts/link-pi.sh`（把仓库 `skills/` 注册进 `~/.pi/agent/settings.json` 的 `skills` 数组），之后新增 skill **自动发现**，只需 pi 内 `/reload` |
 
-link 脚本幂等；实体目录冲突会**报错不覆盖**；`--dry-run` 可预览。
+link 脚本幂等；`--dry-run` 可预览。`link-project.sh` / `link-global.sh` 遇实体目录冲突会**报错不覆盖**；`link-pi.sh` 只改配置（不拷贝、不建链），改写 `settings.json` 前自动备份，pi 递归扫描该目录，新增/删除 skill 都不必再跑脚本。
 
 ## 新建 skill 清单
 
 1. `skills/<name>/SKILL.md`（frontmatter 至少 `name` + `description`；name 用小写字母/数字/连字符，与目录名一致）
 2. `./scripts/link-project.sh`（挂到项目级 `.claude/skills/`）
-3. 需要全局：`./scripts/link-global.sh`
-4. 新开 cc，用 description 里的触发话术验证一轮
+3. 需要 pi：一次性 `./scripts/link-pi.sh`（已配置则跳过；之后新增 skill 自动生效）
+4. 需要全局 cc：`./scripts/link-global.sh`
+5. 新开 cc / pi，用 description 里的触发话术验证一轮
 
 ## 文档输出规范（所有 skill 适用）
 
