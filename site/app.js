@@ -240,18 +240,33 @@
     return wrap;
   }
 
+  /* 双语字段归一：{en,zh} 对象取中文优先，字符串原样 —— 渲染层只吃纯字符串，避免 [object Object] */
+  function pick(o) {
+    if (o == null) return "";
+    if (typeof o === "string") return o;
+    if (typeof o === "object") return o.zh || o.en || "";
+    return String(o);
+  }
+
   function normalizeProfile(d) {
     d = d || {};
     var links = d.links || {};
+    var skills = Array.isArray(d.skills) && d.skills.length ? d.skills : SNAPSHOT.skills;
+    var thoughts = Array.isArray(d.thoughts) && d.thoughts.length ? d.thoughts : SNAPSHOT.thoughts;
     return {
-      name: d.name || SNAPSHOT.name,
-      handle: d.handle || SNAPSHOT.handle,
-      role: d.role || SNAPSHOT.role,
+      name: pick(d.name) || SNAPSHOT.name,
+      handle: pick(d.handle) || SNAPSHOT.handle,
+      role: pick(d.role) || SNAPSHOT.role,
       avatar: d.avatar || SNAPSHOT.avatar,
       avatar_alt: d.avatar_alt || SNAPSHOT.avatar_alt,
-      slogan: d.slogan || SNAPSHOT.slogan,
-      skills: Array.isArray(d.skills) && d.skills.length ? d.skills : SNAPSHOT.skills,
-      thoughts: Array.isArray(d.thoughts) && d.thoughts.length ? d.thoughts : SNAPSHOT.thoughts,
+      slogan: pick(d.slogan) || SNAPSHOT.slogan,
+      skills: skills.map(function (g) {
+        return {
+          category: pick(g.category),
+          items: (Array.isArray(g.items) ? g.items : []).map(pick).filter(Boolean)
+        };
+      }).filter(function (g) { return g.category && g.items.length; }),
+      thoughts: thoughts.map(pick).filter(Boolean),
       links: {
         github: links.github || SNAPSHOT.links.github,
         email: links.email || SNAPSHOT.links.email,
@@ -346,8 +361,10 @@
       fetchJSON("https://yjmm10.github.io/projects.json")
         .then(function (d) {
           return (d && Array.isArray(d.wip)) ? d.wip.map(function (p) {
+            var name = pick(p.name);
+            var tag = pick(p.tagline);
             return {
-              name: ((p.name && p.name.zh) || (p.name && p.name.en) || "") + (p.tagline ? " · " + ((p.tagline && p.tagline.zh) || (p.tagline && p.tagline.en) || "") : ""),
+              name: tag ? name + " · " + tag : name,
               status: p.status || ""
             };
           }) : WIP_SNAPSHOT;
