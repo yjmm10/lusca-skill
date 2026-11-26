@@ -1,0 +1,12 @@
+{
+  "eval_id": 3,
+  "eval_name": "naming-brand-seo",
+  "prompt": "给一款面向设计师的 AI 工具做产品站，名字想叫 Hephaestus 但太长。帮我换成更短、好听、有文化意象的名字，配一个相符的 logo，并做中文落地页和英文 /en/ 页面。要求专业权威，不要太花哨，还要有利于搜索引擎和 AI 引用。",
+  "assertions": [
+    "At least 3 short name candidates and one recommendation are documented",
+    "Logo SVG and PNG exist and the brand doc explains their concept",
+    "Chinese landing page and English /en/ landing page both exist",
+    "SEO/GEO includes canonical, hreflang, JSON-LD and llms.txt",
+    "Performance or cache configuration is present"
+  ]
+}

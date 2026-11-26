@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>lucas-skill · Claude Code 多 Skill 工作区</title>
+  <meta name="description" content="lucas-skill：单一源 + symlink 发现层维护的 Claude Code / pi 多 Skill 工作区——改一处，处处最新。论文科研、写作发布、调研、工程脚手架四线 16 个技能。">
+  <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/logo-32.png">
+  <link rel="stylesheet" href="styles/tokens.css">
+  <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+
+<header class="site-head">
+  <div class="wrap head-row">
+    <a class="brand" href="#/">
+      <img class="brand-logo" src="assets/logo.svg" alt="lucas-skill logo：中心实心块为 skills/ 唯一源，四条链路连接空心块为 symlink 发现层">
+      <span class="brand-text">
+        <span class="brand-name">lucas-skill</span>
+        <span class="brand-sub">Claude Code Skill Workspace</span>
+      </span>
+    </a>
+    <nav class="tabs" id="nav" aria-label="站点导航">
+      <a href="#/" data-view="home" class="on">首页</a>
+      <a href="#/skills" data-view="skills">Skills</a>
+      <a href="#/about" data-view="about">关于</a>
+    </nav>
+    <a class="gh-link" href="https://github.com/yjmm10/lusca-skill" target="_blank" rel="noopener" aria-label="GitHub 仓库">
+      <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+    </a>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- ========== 视图一：落地页 ========== -->
+  <section id="view-home" class="view" aria-label="首页">
+    <div class="hero">
+      <img class="hero-logo" src="assets/logo.svg" alt="lucas-skill logo">
+      <h1>lucas-skill</h1>
+      <p class="hero-tagline">用<strong>单一源 + symlink 发现层</strong>维护的 Claude Code / pi 多 Skill 工作区——<strong>改一处，处处最新</strong>。</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="#/skills">浏览 Skills</a>
+        <a class="btn btn-outline" href="https://github.com/yjmm10/lusca-skill" target="_blank" rel="noopener">GitHub 仓库</a>
+      </div>
+    </div>
+
+    <div class="stats" id="stats"><!-- JS 填充 --></div>
+
+    <div class="chain-card">
+      <span class="chain-label">论文主线</span>
+      <span class="chain-node">lucas-paper-search<small>检索</small></span>
+      <span class="chain-arrow">→</span>
+      <span class="chain-node">lucas-pdf-parse<small>解析</small></span>
+      <span class="chain-arrow">→</span>
+      <span class="chain-node">lucas-paper-read<small>精读</small></span>
+    </div>
+
+    <h2 class="section-title">五大分类</h2>
+    <div class="cat-grid" id="cat-grid"><!-- JS 填充 --></div>
+
+    <div class="howto">
+      <h2 class="section-title" style="margin-top:0">如何使用这些 Skill</h2>
+      <ol>
+        <li><p><strong>克隆仓库</strong>：<code>git clone https://github.com/yjmm10/lusca-skill</code>，并确保 <code>skills/</code> 是唯一可编辑源。</p></li>
+        <li><p><strong>挂载发现层</strong>：仓库根跑 <code>./scripts/link-project.sh</code> 挂到项目级 <code>.claude/skills/</code>；想任意目录可用再跑 <code>./scripts/link-global.sh</code>；pi 用户一次性 <code>./scripts/link-pi.sh</code>，之后新增 skill 自动发现。</p></li>
+        <li><p><strong>新开会话触发</strong>：重开 cc / pi 会话，用自然语言（如「帮我精读这篇论文」）或斜杠指令（如 <code>/lucas-paper-read</code>）触发对应 skill。</p></li>
+        <li><p><strong>改完记得同步</strong>：只改 SKILL.md 正文新开会话即生效；增删 skill 目录后重跑 link 脚本；站点数据跑 <code>python scripts/build-site-data.py</code> 刷新。</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ========== 视图二：Skills ========== -->
+  <section id="view-skills" class="view" hidden aria-label="Skills 列表">
+    <div class="filter-bar" id="filter-bar"><!-- JS 填充 --></div>
+    <div id="skill-groups"><!-- JS 填充 --></div>
+  </section>
+
+  <!-- ========== 视图三：关于（布局骨架参考 fj-starmap 暖瓷卡片流） ========== -->
+  <section id="view-about" class="view" hidden aria-label="关于">
+    <div class="about-page">
+
+      <section class="about-card">
+        <div class="panel-head"><h2>👋 关于作者</h2></div>
+        <div class="profile" id="profile" aria-live="polite"><!-- JS 渲染：数据取自 yjmm10.github.io profile.json，内置快照兜底 --></div>
+        <noscript><p>作者信息需启用 JavaScript 加载，也可直接访问 <a href="https://yjmm10.github.io/" target="_blank" rel="noopener">yjmm10.github.io</a> 查看。</p></noscript>
+      </section>
+
+      <section class="about-card">
+        <div class="panel-head"><h2>🧩 关于 lucas-skill</h2></div>
+        <p class="hero-sub">Claude Code 多 Skill 工作区 · 单一源，处处最新</p>
+        <p>本仓库用<strong>单一源 + symlink 发现层</strong>维护多个 Claude Code（cc）与 pi skill：所有 skill 源只在 <code style="font-family:var(--font-mono);font-size:var(--text-xs)">skills/&lt;category&gt;/&lt;name&gt;/</code>，<code style="font-family:var(--font-mono);font-size:var(--text-xs)">.claude/skills/</code>、<code style="font-family:var(--font-mono);font-size:var(--text-xs)">~/.claude/skills/</code> 一律是符号链接——改动只发生在唯一源，所有发现层即时同步，从根上杜绝「改了这份忘了那份」。</p>
+        <p>技能按<strong>论文科研 / 写作发布 / 调研 / 工程脚手架 / 元技能</strong>五线管理，覆盖论文检索、解析、精读、润色、LaTeX、海报，到论文与报告博客化、技术教程、事件调研，再到项目脚手架与产品官网的完整生产力链。</p>
+        <div class="hero-badges">
+          <span class="hero-badge">🗃️ 单一源管理</span>
+          <span class="hero-badge">🔗 symlink 发现层</span>
+          <span class="hero-badge">🖥️ cc + pi 双端发现</span>
+          <span class="hero-badge">🤖 AI 原生工作流</span>
+        </div>
+        <div class="info-grid">
+          <div class="info-item"><span class="info-k">Skill 总数</span><span class="info-v" id="info-count">—</span></div>
+          <div class="info-item"><span class="info-k">技能分类</span><span class="info-v">5 线管理</span></div>
+          <div class="info-item"><span class="info-k">论文主链</span><span class="info-v">检索 → 解析 → 精读</span></div>
+          <div class="info-item"><span class="info-k">源码仓库</span><span class="info-v"><a href="https://github.com/yjmm10/lusca-skill" target="_blank" rel="noopener">GitHub · lusca-skill</a></span></div>
+          <div class="info-item"><span class="info-k">本站部署</span><span class="info-v">GitHub Pages · Actions 自动部署</span></div>
+          <div class="info-item"><span class="info-k">站点数据</span><span class="info-v" id="info-generated">—</span></div>
+        </div>
+      </section>
+
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-foot">
+  <div class="wrap">
+    lucas-skill · 单一源，处处最新 · <a href="https://github.com/yjmm10/lusca-skill" target="_blank" rel="noopener">GitHub</a> · <a href="https://yjmm10.github.io" target="_blank" rel="noopener">作者主页</a>
+  </div>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

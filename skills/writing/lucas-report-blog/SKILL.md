@@ -10,7 +10,7 @@ description: >-
   报告路径，本地文件除 imgs 外不引用，末尾"参考来源"（供查证）而非"关键来源"（论证证据）。绝不编造，不确定标 uncertain。
   用户提到把报告写成博客、报告通俗化、报告解读、调研报告转博文、事件报告转公众号、这份报告讲成故事、
   report to blog、blog this report 时务必使用本技能——只要输入是一份"报告"而非"论文"，且要通俗化发布，就走本技能。
-version: "1.5.1"
+version: "1.5.2"
 author: lucas
 user-invocable: true
 argument-hint: "[报告.md / 报告目录 / 粘贴文本]"
@@ -212,6 +212,7 @@ locate → read → select → outline → write → polish → save
 - **frontmatter**：`title`（活泼版）/ `subtitle`（可选）/ `source_report`（原报告**标题**，不带本地路径）/ `blog_date` / `read_minutes` / `slug` / `tags` / `abstract`（≤200 字博文摘要）/ `cover`（氛围图外链 URL）/ `cover_backup`（本地备份路径）/ `cover_source`（可选，来源描述）
 - **`abstract` 是 frontmatter 的博文摘要**（≤200 字中文）：用于平台描述/SEO/列表预览，概括"报告讲了什么、说清楚后的图景、对读者意味什么"；与正文 TL;DR（一句话钩子）互补——abstract 是完整段落、TL;DR 是一句话
 - **`cover` 必须是 http(s):// 开头的图片直链**——正文实际能加载的远程图片地址，❌ 严禁填 `Bing 每日一图 · <copyright>` 或 `picsum · seed: …` 这类文字描述（文字来源描述放 `cover_source`）；落盘前自检 `cover` 以 `http` 开头
+- **结尾不带免责 / 特别说明**：遵 CLAUDE.md——末尾「参考来源」即收尾，不写「（以上整理自公开报道，观点为作者个人看法，欢迎交流。）」这类免责式尾巴；事实与澄清的边界写在行文里
 - **段落不硬换行**：正文段落与列表项写在一行，段间空行分隔
 - **交付精简**：落盘后只返回路径 + 标题 + 一句话定位，**不内联重复展示完整博客**
 

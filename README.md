@@ -1,6 +1,11 @@
 # lucas-skill — Claude Code 多 Skill 工作区
 
-本仓库用**单一源 + symlink 发现层**维护多个 cc skill，保证「改一处，处处最新」。skill 按类型分四类目录管理。
+<div align="center">
+  <img src="assets/logo.svg" width="120" alt="lucas-skill logo：中心实心块为 skills/ 唯一源，四条链路连接空心块为 symlink 发现层" />
+  <p><a href="https://yjmm10.github.io/lusca-skill/">在线站点</a> · <a href="https://github.com/yjmm10/lusca-skill">GitHub</a></p>
+</div>
+
+本仓库用**单一源 + symlink 发现层**维护多个 cc skill，保证「改一处，处处最新」。skill 按类型分五类目录管理。
 
 ```
 lucas-skill/
@@ -14,10 +19,20 @@ lucas-skill/
 ├── scripts/
 │   ├── link-project.sh   # 重建项目级链接（递归扫描 skills/）
 │   ├── link-global.sh    # 重建全局 ~/.claude/skills 链接
-│   └── link-pi.sh        # 注册到 pi（递归自动发现，新增 skill 免维护）
+│   ├── link-pi.sh        # 注册到 pi（递归自动发现，新增 skill 免维护）
+│   └── build-site-data.py # 生成官网数据 site/data/skills.json + 同步 logo
+├── site/              # 官网（纯静态：落地页 / Skills / 关于三标签，GitHub Pages 自动部署）
+├── assets/            # 品牌：logo.svg / logo-*.png（站点由构建脚本同步拷贝）
 ├── outputs/           # 各 skill 产出（gitignored：lucas reflex / 检索报告）
 └── docs/superpowers/specs/ # 工作区设计规范
 ```
+
+## 官网（GitHub Pages）
+
+- **访问地址**：<https://yjmm10.github.io/lusca-skill/>，三个固定标签：落地页 / Skills / 关于（hash 切换，刷新不 404）
+- **技术形态**：纯静态免构建（原生 HTML/CSS/JS + tokens 设计令牌，无 node 依赖）；CI 在部署前自动重跑 `scripts/build-site-data.py`，站点数据永远与 `skills/` 单一源同步
+- **本地预览**：`python scripts/build-site-data.py && python -m http.server -d site 8080` → 打开 `http://localhost:8080`
+- **部署触发**：push 到 `main` 即自动部署（`.github/workflows/deploy.yml`）；首次需在仓库 Settings → Pages 把 Source 设为 GitHub Actions
 
 ## 技能分类总览
 

@@ -7,7 +7,7 @@ description: >-
   绝不编造论文未说的内容，公式只讲用途不讲推导。用户提到把论文写成博客、论文科普、通俗解读这篇论文、
   博客化分析、写公众号文章解读论文、给同行讲讲这篇论文、论文故事化、深入浅出讲一下这篇、
   paper to blog、explain this paper、paper explainer 时使用本技能。
-version: "1.7.2"
+version: "1.7.3"
 author: lucas
 user-invocable: true
 argument-hint: "[parse 结果 / 精读笔记 / 论文地址 / arXiv ID / URL / PDF / 粘贴文本]"
@@ -186,6 +186,7 @@ locate-source → read-or-reuse → outline-blog → write-blog → polish-tone 
 - **`cover` 必须是 http(s):// 开头的图片直链**——正文实际能加载的远程图片地址，❌ 严禁填 `Bing 每日一图 · <copyright>` 这类文字描述（文字来源描述放 `cover_source`）；落盘前自检 `cover` 以 `http` 开头，否则不合规
 - **`abstract` 是 frontmatter 的博文摘要**（≤200 字中文）：用于平台描述/SEO/列表预览，概括"论文讲了什么、核心贡献、对读者意味什么"；与正文 TL;DR（一句话钩子）互补——abstract 是完整段落、TL;DR 是一句话
 - **不带文末出处块**：正文结尾**不加**任何仓库/skill 内部信息（作者/版本/出处三行）——全仓已废除文末出处块规范，产出保持自解耦、可直接发布
+- **结尾不带免责 / 特别说明**：遵 CLAUDE.md——不写「（数据与结论均来自论文原文，解读部分为作者观点，欢迎交流。）」「仅供参考」这类免责式尾巴；事实与解读的边界写在行文里（如「论文没说，我的判断是…」），结尾干净收束，像专业作者的成稿
 - **段落不硬换行**：遵 CLAUDE.md——正文段落与列表项在源码里写在一行，段间空行分隔，不在句中按列宽折行
 
 ---

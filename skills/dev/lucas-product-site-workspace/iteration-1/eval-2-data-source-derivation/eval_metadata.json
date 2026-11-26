@@ -1,0 +1,12 @@
+{
+  "eval_id": 2,
+  "eval_name": "data-source-derivation",
+  "prompt": "我们有一个产品数据 API，想做产品站但不想编造任何指标。请把 assets/product.example.json 当成数据样本，先归一成统一 schema，再让落地页只展示数据页里的关键信息。顺便调研适合这个数据规模的 UI 组件，并把依据写进文档。",
+  "assertions": [
+    "Example product data is copied and normalized to the required schema",
+    "Derived highlights contain no metric values absent from the source data",
+    "Landing page reads derived highlights instead of hardcoding metric values",
+    "UI decision document cites at least 3 sources and states a tradeoff",
+    "Data page displays source and period for metrics"
+  ]
+}

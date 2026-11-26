@@ -1,0 +1,146 @@
+{
+  "schemaVersion": "1.0",
+  "product": {
+    "name": "Aether",
+    "slug": "aether",
+    "category": "developer-tools",
+    "tagline": {
+      "zh": "让产品数据自己讲清楚",
+      "en": "Let your product data speak clearly"
+    },
+    "summary": {
+      "zh": "Aether 是一个面向产品团队的轻量数据展示工具，把分散的指标、更新和来源整理成一页可核验的事实。",
+      "en": "Aether is a lightweight data presentation tool for product teams, turning scattered metrics, updates, and sources into one verifiable page."
+    },
+    "website": "https://example.com",
+    "stage": "beta"
+  },
+  "author": {
+    "name": "Example Team",
+    "role": {
+      "zh": "产品与数据工程团队",
+      "en": "Product and data engineering team"
+    },
+    "bio": {
+      "zh": "示例团队信息：请替换为真实作者或团队介绍。",
+      "en": "Example team bio: replace with the real author or team introduction."
+    },
+    "links": [
+      { "label": "GitHub", "url": "https://github.com/example/aether" }
+    ]
+  },
+  "metrics": [
+    {
+      "id": "response-time",
+      "label": { "zh": "中位响应时间", "en": "Median response time" },
+      "value": "42",
+      "unit": "ms",
+      "delta": "较上月下降 18%",
+      "period": "2026-06",
+      "source": "https://example.com/benchmarks/2026-06",
+      "highlight": true
+    },
+    {
+      "id": "uptime",
+      "label": { "zh": "可用性", "en": "Availability" },
+      "value": "99.98",
+      "unit": "%",
+      "delta": "近 90 天",
+      "period": "2026-06",
+      "source": "https://example.com/status",
+      "highlight": true
+    },
+    {
+      "id": "datasets",
+      "label": { "zh": "接入数据源", "en": "Connected datasets" },
+      "value": "36",
+      "unit": "个",
+      "delta": "示例数据",
+      "period": "2026-06",
+      "source": "https://example.com/data-sources",
+      "highlight": true
+    }
+  ],
+  "updates": [
+    {
+      "id": "update-2026-06-20",
+      "date": "2026-06-20",
+      "title": {
+        "zh": "新增数据口径说明",
+        "en": "Added metric methodology notes"
+      },
+      "summary": {
+        "zh": "数据页现在为每项指标显示统计口径和来源链接。",
+        "en": "The data page now shows methodology and source links for each metric."
+      },
+      "url": "https://example.com/updates/methodology",
+      "tags": ["data", "docs"]
+    },
+    {
+      "id": "update-2026-05-12",
+      "date": "2026-05-12",
+      "title": {
+        "zh": "上线英文站与主题切换",
+        "en": "Launched English site and theme switcher"
+      },
+      "summary": {
+        "zh": "站点支持中英文、深浅主题与跟随系统。",
+        "en": "The site supports Chinese/English, dark/light themes, and system preference."
+      },
+      "url": "https://example.com/updates/i18n",
+      "tags": ["i18n", "theme"]
+    }
+  ],
+  "features": [
+    {
+      "id": "single-source",
+      "title": { "zh": "单一数据源", "en": "Single source of truth" },
+      "description": {
+        "zh": "数据页维护完整事实，落地页只做派生摘要，避免口径漂移。",
+        "en": "The data page keeps full facts while the landing page derives summaries to prevent drift."
+      },
+      "highlight": true
+    },
+    {
+      "id": "verifiable",
+      "title": { "zh": "可核验展示", "en": "Verifiable by design" },
+      "description": {
+        "zh": "每项指标带时间、单位与来源链接，读者能自行查证。",
+        "en": "Every metric carries time, unit, and source link so readers can verify it."
+      },
+      "highlight": true
+    },
+    {
+      "id": "fast-static",
+      "title": { "zh": "静态优先", "en": "Static first" },
+      "description": {
+        "zh": "静态输出、按需交互与缓存策略让首屏保持快速。",
+        "en": "Static output, selective interactivity, and cache rules keep the first screen fast."
+      },
+      "highlight": false
+    }
+  ],
+  "gallery": [
+    {
+      "src": "/images/product-preview.svg",
+      "alt": { "zh": "产品界面预览示意图", "en": "Illustrative product interface preview" },
+      "caption": {
+        "zh": "示例界面：请替换为真实产品截图。",
+        "en": "Illustrative UI: replace with a real product screenshot."
+      }
+    }
+  ],
+  "faq": [
+    {
+      "question": { "zh": "数据多久更新一次？", "en": "How often is the data updated?" },
+      "answer": {
+        "zh": "示例回答：请按真实更新频率填写，并说明数据来源。",
+        "en": "Example answer: replace with the real update cadence and explain the source."
+      }
+    }
+  ],
+  "disclaimer": {
+    "zh": "示例免责声明：本站数据用于产品说明，不构成投资、采购或法律建议；实际信息以来源链接和更新日期为准。",
+    "en": "Example disclaimer: data on this site is for product information only and is not investment, procurement, or legal advice; refer to source links and update dates for current information."
+  }
+}

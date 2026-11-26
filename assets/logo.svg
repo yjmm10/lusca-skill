@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- lucas-skill · 单源多链：中心实心块 = skills/ 唯一源，四条链路 + 空心块 = symlink 发现层（.claude / ~/.claude / pi / 其他消费者） -->
+  <rect width="512" height="512" rx="96" fill="#4F46E5"/>
+  <g stroke="#FFFFFF" stroke-opacity="0.55" stroke-width="20">
+    <line x1="256" y1="256" x2="132" y2="132"/>
+    <line x1="256" y1="256" x2="380" y2="132"/>
+    <line x1="256" y1="256" x2="132" y2="380"/>
+    <line x1="256" y1="256" x2="380" y2="380"/>
+  </g>
+  <g fill="none" stroke="#FFFFFF" stroke-width="16">
+    <rect x="104" y="104" width="56" height="56" rx="14"/>
+    <rect x="352" y="104" width="56" height="56" rx="14"/>
+    <rect x="104" y="352" width="56" height="56" rx="14"/>
+    <rect x="352" y="352" width="56" height="56" rx="14"/>
+  </g>
+  <rect x="208" y="208" width="96" height="96" rx="24" fill="#FFFFFF"/>
+</svg>

@@ -1,0 +1,166 @@
+{
+  "generated_at": "2026-11-26 07:10:28 UTC",
+  "stats": {
+    "total": 16,
+    "categories": 5
+  },
+  "categories": [
+    {
+      "id": "paper",
+      "name": "论文科研线",
+      "emoji": "📄",
+      "desc": "检索 → 解析 → 精读 → 润色 → LaTeX → 海报的全流程论文生产力链",
+      "count": 6,
+      "skills": [
+        {
+          "name": "lucas-paper-latex",
+          "version": "1.1.1",
+          "description": "把润色后的学术文稿（Markdown / 粘贴文本 / 已有 .tex 草稿）转成可编译的 LaTeX： 中文稿先做学术翻译转成英文再排版，英文稿直接排版不重写内容；保护数学公式、 \\cite/\\ref/\\label 与自定义宏，特殊字符正确转义，标题/列表/图表/表格/引用合法映射， 选对文档类与宏包，并实际编译验证（三平台 LaTeX 环境安装见 references/setup-latex.md）。 绝不臆造数据/引用/论断，只转格式不改内容。用户提到转 latex、 生成 tex、排版成 LaTeX、论文转 LaTeX、中文稿转英文 latex、导出 tex、整理成 LaTeX、 出一份 tex 投稿、markdown to latex、convert to tex、make it a tex paper、typeset as latex 时使用本技能——哪怕用户只说\"把这篇整理成能编译的 tex\"也走本技能。",
+          "category": "paper",
+          "command": "/lucas-paper-latex"
+        },
+        {
+          "name": "lucas-paper-polish",
+          "version": "1.10.2",
+          "description": "润色已有学术初稿：语法与流畅度修复、按证据强度校准措辞、去除 AI 腔、 中译英改写到可投稿质量。绝不臆造数据/引用/论断；任何可能改变科学含义的 改动一律标注待作者确认。用户提到润色、改措辞、去 AI 味、中转英投稿、 这话是不是说大了、polish my paper、tone down 时使用本技能。",
+          "category": "paper",
+          "command": "/lucas-paper-polish"
+        },
+        {
+          "name": "lucas-paper-poster",
+          "version": "0.1.1",
+          "description": "基于 lucas-paper-read 阅读笔记生成会议尺寸可编辑海报（60×36in）：提炼文案、只用以有 imgs/、 生成 QR、固定 HTML 模板、FULL 90% 门控最多 3 轮、导出 poster.pptx。用户提到从阅读笔记做海报、 论文海报、paper poster、出海报 pptx、/lucas-paper-poster 时使用。不替代 ResearchStudio paper2poster 全链。",
+          "category": "paper",
+          "command": "/lucas-paper-poster"
+        },
+        {
+          "name": "lucas-paper-read",
+          "version": "1.10.4",
+          "description": "精读一篇学术论文：输入 PDF / 链接 / arXiv ID / 文本，产出结构化阅读笔记（核心贡献、 方法概要、批判性评估、可复用要点）。融合六维精读框架与多视角批判（含反方最强论证）， 立足读者视角——不是给作者的 referee report。用户提到读论文、精读这篇、帮我看看这篇论文、 这篇讲了啥、值不值得读、paper read、read this paper 时使用本技能。",
+          "category": "paper",
+          "command": "/lucas-paper-read"
+        },
+        {
+          "name": "lucas-paper-search",
+          "version": "2.1.4",
+          "description": "多源并行文献检索：arXiv/DBLP/OpenAlex/OpenReview/Semantic Scholar/Crossref/ DeepXiv/Sciverse 八大开源 API + 模型自身知识，覆盖英文 CS/理工与顶会 (NeurIPS/ICLR/ICML)。用户提到搜论文、查文献、找 related work、prior art、 近 X 年某主题发表时使用本技能。",
+          "category": "paper",
+          "command": "/lucas-paper-search"
+        },
+        {
+          "name": "lucas-pdf-parse",
+          "version": "1.0.3",
+          "description": "用 MinerU API 把 PDF / 图片 / DOCX 解析成结构化 Markdown（版面还原：双栏、 表格、公式、图表、阅读顺序，图片自动抽取到本地）。支持本地文件与 URL （含 arXiv PDF），可批量。用户提到解析 PDF、PDF 转 markdown、提取 PDF 内容、 版面还原、图片抽取、文档数字化、parse pdf、pdf to markdown 时使用本技能。",
+          "category": "paper",
+          "command": "/lucas-pdf-parse"
+        }
+      ]
+    },
+    {
+      "id": "writing",
+      "name": "写作与发布线",
+      "emoji": "✍️",
+      "desc": "论文博客化、报告博客化、技术教程、风格提炼与投稿合规审查",
+      "count": 5,
+      "skills": [
+        {
+          "name": "lucas-kunpeng-publish",
+          "version": null,
+          "description": "对照鲲鹏社区发布要求审计并改进技术稿件：无外部链接、无图片、表述专业严谨、包含实际操作（代码+命令+步骤）、教程有实际应用五条硬性要求，外加 AI 痕迹与原创红线；产出审查报告 + 改进稿件 + 人工待办清单。改进路径是\"真实化\"（实机验证、真实数据、人工重写）而非伪装。用户提到投稿鲲鹏社区、鲲鹏社区发文、发布前合规检查、对照鲲鹏社区要求改文章、鲲鹏文章能不能发、文章合规审查、kunpeng publish、发鲲鹏社区前帮我看看 时使用本技能。",
+          "category": "writing",
+          "command": "/lucas-kunpeng-publish"
+        },
+        {
+          "name": "lucas-paper-blog",
+          "version": "1.7.3",
+          "description": "把一篇学术论文转成面向开发者/技术社区的通俗科普博客：通俗易懂、深入浅出、循序渐进、戳领域痛点引发行业共鸣、 带自问自答与轻度打趣的互动语气、8-12 分钟阅读、活泼标题（论文关键词/简称 + 面向开发者的钩子）。 输入支持三种：默认 lucas-pdf-parse 解析结果、lucas-paper-read 精读笔记，或直接给论文地址（arXiv ID/URL/PDF/文本）。 绝不编造论文未说的内容，公式只讲用途不讲推导。用户提到把论文写成博客、论文科普、通俗解读这篇论文、 博客化分析、写公众号文章解读论文、给同行讲讲这篇论文、论文故事化、深入浅出讲一下这篇、 paper to blog、explain this paper、paper explainer 时使用本技能。",
+          "category": "writing",
+          "command": "/lucas-paper-blog"
+        },
+        {
+          "name": "lucas-report-blog",
+          "version": "1.5.2",
+          "description": "把一份报告（事件报告 / 调研报告 / 研究报告 / 行业分析等结构化、事实密集的文档）转成面向大众或同行的通俗博文。 一切为给读者提供知识价值：从报告里挑高价值、读者真正关心的内容呈现（非机械转录所有模块）；作者的价值靠 筛选 + 组织 + 讲清楚体现，让读者\"省时间、抓重点、搞清楚这事\"，而非靠观点论证。总纲是整理加工、把事情说清楚—— 不是论证/评价：作者穿插的是澄清（这处各来源一致/冲突、这数字意味着什么、这里未经证实）而非观点；读透报告后 用作者的话讲，澄清散落在关键处 inline（不单设\"我怎么看\"节），时间线按需（折进正文，不单设\"时间线\"节）， 收束用承接上文的过渡（不用割裂标签）。博文自包含、与源报告解耦：不嵌入完整报告原文，资源块只放外链不放本地 报告路径，本地文件除 imgs 外不引用，末尾\"参考来源\"（供查证）而非\"关键来源\"（论证证据）。绝不编造，不确定标 uncertain。 用户提到把报告写成博客、报告通俗化、报告解读、调研报告转博文、事件报告转公众号、这份报告讲成故事、 report to blog、blog this report 时务必使用本技能——只要输入是一份\"报告\"而非\"论文\"，且要通俗化发布，就走本技能。",
+          "category": "writing",
+          "command": "/lucas-report-blog"
+        },
+        {
+          "name": "lucas-style-distill",
+          "version": "1.0.1",
+          "description": "从一篇文章（或同一作者的若干篇）里提取写作风格 DNA：把\"这段文字听起来像谁在说话\"拆成 语态与人格、句法指纹、用词癖好、修辞与意象、节奏与结构、立场与论证姿态六个维度，每条判断 都附原文佐证，产出一份可被 agent 复用的风格画像（含签名清单、可迁移 Do/Don't、反例）。 内置通用文章与学术/技术写作两套模板；支持单篇风格画像与多篇合并的作者 DNA。绝不臆造原文 没有的风格特征，每条结论都能指回原文。用户提到提取写作风格、分析作者文风、风格画像、风格 DNA、抓一下这位作者的文风、模仿某人文风前先抓风格、writing style analysis、extract the voice、 author voice 时使用本技能。",
+          "category": "writing",
+          "command": "/lucas-style-distill"
+        },
+        {
+          "name": "lucas-tech-writing",
+          "version": "1.1.1",
+          "description": "输入一个技术主题，检索多篇 Web 技术文档（官方文档/技术博客/教程，核心参考 ≥3 篇）做调研素材， 把散落各处的碎片知识消化成一篇新手可读、完整自洽、带图带代码的技术博客——读者不需要再点开 任何源文档。模块化主题给出逐模块快速上手；源文档缺代码时主动查官方文档/GitHub 补齐并查证 API 真实存在；图片取自源文档，AI 逐张检查水印（无水印直接用+署名，能换就换，稀缺必要的 保留原样+显著标注，绝不裁剪涂抹）。反拼凑：一条叙事线消化所有来源，来源只出现在文末参考。 产出干货向：反冗余、反课程腔，每段都要有信息量，基础讲清后必给进阶拓展（调优/生态/边界）。 用户提到写篇 XX 的博客、调研这个技术写成文章、把零散资料整理成完整教程、XX 入门文章帮我 写一篇、这个主题写成博文、写篇 XX 的干货文、tech writing、topic to blog、write a tutorial/blog about X 时使用本技能。",
+          "category": "writing",
+          "command": "/lucas-tech-writing"
+        }
+      ]
+    },
+    {
+      "id": "research",
+      "name": "调研线",
+      "emoji": "🔍",
+      "desc": "需求/竞品/论文三线调研、新闻事件多平台深度报告",
+      "count": 2,
+      "skills": [
+        {
+          "name": "lucas-command-query",
+          "version": "1.0.0",
+          "description": "给定一个主题 / 想法 / 需求，先确认理解对不对，再调研市面上的商业产品、开源项目和相关论文， 然后把需求整理成带调研依据的清单，最后给出下一步意见与可行性方案（含推荐路线与风险）。 用户提到帮我调研这个需求、这个想法可行吗、市面上有没有人做过、竞品调研、同类产品、 开源有没有现成的、论文里有没有相关做法、需求整理、可行性分析、要不要做、怎么做、值不值得做、 立项前调研、research this idea、feasibility 时使用本技能——只要意图是「我想做一个东西， 先搞清楚别人做到哪、我们该怎么做」，就走本技能。",
+          "category": "research",
+          "command": "/lucas-command-query"
+        },
+        {
+          "name": "lucas-news-report",
+          "version": "1.2.0",
+          "description": "对一个新闻/热点事件做多平台深度调研，产出完整事件报告。先核验新闻真实存在（无报道、多义、疑似谣言时与用户确认再继续）， 再采集各大平台反馈（官方宣传与答复、权威媒体报道、社交平台与用户评价），整合成带时间线与模块化分析的完整报告； 可按需追加通俗博文版（完整报告太官方、用于发布时）。绝不编造未核实内容，区分事实与评估，信源分级，不确定标 uncertain。 用户提到追某个新闻、查事件来龙去脉、新闻调研、热点事件复盘、整理这个事的资讯、各大平台怎么看、新闻汇总、 帮我扒一下 XX、XX 怎么回事、event report、news dive、news research 时务必使用本技能—— 哪怕用户只丢一句\"帮我看看 XX 这件事\"，只要意图是了解一个真实事件的来龙去脉与各方反应，就走本技能。",
+          "category": "research",
+          "command": "/lucas-news-report"
+        }
+      ]
+    },
+    {
+      "id": "dev",
+      "name": "工程脚手架线",
+      "emoji": "🛠️",
+      "desc": "新项目脚手架、产品官网搭建",
+      "count": 2,
+      "skills": [
+        {
+          "name": "lucas-product-site",
+          "version": "0.1.0",
+          "description": "为产品/工具/项目搭建静态产品官网：落地页 + 数据页 + 关于页，数据页作为事实单一源，落地页最新区块从产品数据派生；含 Astro+TS+Tailwind 骨架、深浅主题与跟随系统、中英文、SEO/GEO、组件调研、性能与缓存、品牌命名与 SVG/PNG logo、说明文档和页面截图。用户提到做产品站、产品官网、静态展示站、落地页、数据展示页、关于页、项目主页、官网改版、给产品做个网站、product site、landing page、data page、about page、SEO/GEO、多语言官网、深浅主题官网、产品 logo 与截图时使用本技能——哪怕只说“帮我给这个项目做个官网”也走本技能。",
+          "category": "dev",
+          "command": "/lucas-product-site"
+        },
+        {
+          "name": "lucas-project-scaffold",
+          "version": "0.3.0",
+          "description": "从零搭建新项目脚手架：根据需求选合适的项目名、定项目目录结构、写说明文档（README）、 配置 agent 文件（CLAUDE.md / AGENTS.md）、绘制项目 logo；能用 github.io 部署的项目直接搭好 GitHub Pages CI/CD；前端项目挑选合适框架并建立统一设计规范（改动需整体评估）； 后端项目挑选框架，开发中暴露的环境参数用专门文件说明并随改动及时更新，设计不合理处主动反馈； 前端页面可选配「关于页」（支持用户给参考页面做引用，注意与原有样式适配，也可以不做）。 关键决策点以提供选项的方式交由用户选择，执行中发现问题随时提醒。 用户提到新建项目、搭脚手架、项目初始化、init 一个项目、新仓库起步、项目起名、 目录结构设计、搭 CI/CD、github pages 部署、项目模板、scaffold、bootstrap a project、 project starter、init project、创建一个网站/网页应用、写个官网、新开一个小工具项目、 甚至只是「帮我建个仓库开始写」时，都使用本技能——宁可多触发，不要漏掉。",
+          "category": "dev",
+          "command": "/lucas-project-scaffold"
+        }
+      ]
+    },
+    {
+      "id": "meta",
+      "name": "元技能",
+      "emoji": "🪞",
+      "desc": "对本工作区的 skill 使用做事后反省与改进建议",
+      "count": 1,
+      "skills": [
+        {
+          "name": "lucas",
+          "version": "1.4.2",
+          "description": "反省元技能（可选·事后触发）：在其他任务完成后，对本会话中出现的、与所涉 skill 强相关的问题做多维度分析，输出\"问题 + 改进建议\"清单，按会话归档到 ./outputs/lucas/，一个 session 一份文档。不占用其他 skill 的功能、不接管任务型输入；只记录与分析，绝不自动改动任何 skill；改进建议需用户确认后由对应维护流程执行。用户提到\"反省本 session\"\"复盘刚才 skill 用得不对的地方\"\"记录这次的问题与改法\"\"lucas\"\"reflex\"时使用本技能。",
+          "category": "meta",
+          "command": "/lucas"
+        }
+      ]
+    }
+  ]
+}

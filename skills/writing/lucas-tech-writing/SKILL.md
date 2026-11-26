@@ -10,7 +10,7 @@ description: >-
   用户提到写篇 XX 的博客、调研这个技术写成文章、把零散资料整理成完整教程、XX 入门文章帮我
   写一篇、这个主题写成博文、写篇 XX 的干货文、tech writing、topic to blog、write a
   tutorial/blog about X 时使用本技能。
-version: "1.1.0"
+version: "1.1.1"
 author: lucas
 user-invocable: true
 argument-hint: "[技术主题，可带版本/语言/平台等范围限定]"
@@ -139,7 +139,7 @@ outputs/lucas-tech-writing/{slug}/
 - **frontmatter**：`title` / `topic` / `slug` / `category` / `tags` / `abstract` / `read_minutes` /
   `blog_date` / `cover` / `cover_backup` / `cover_source` / `sources` / `generator` / `generated_at`
   ——完整字段与成文骨架见 `assets/blog-template.md`
-- **不带文末出处块**（仓库已废除）；参考来源节属于文章内容，保留
+- **不带文末出处块、不带免责 / 特别说明尾巴**（出处块仓库已废除；免责尾巴遵 CLAUDE.md「按专业标准交付」——不写「仅供参考」「欢迎交流」这类结尾）；参考来源节属于文章内容，保留
 
 ---
 
