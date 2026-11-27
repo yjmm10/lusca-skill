@@ -131,28 +131,36 @@ def sync_plugin() -> int:
 
 
 def plugin_is_fresh() -> tuple[bool, str]:
-    """校验 plugin/skills/ 拷贝与 skills/ 单一源逐文件一致（内容级比较，不依赖 mtime）。"""
+    """校验 plugin/skills/ 拷贝与 skills/ 单一源逐文件一致（换行归一化后内容级比较，不受 autocrlf 影响）。"""
     names = {name for name, _ in skill_source_dirs()}
     out = PLUGIN_DIR / "skills"
     if not out.is_dir():
         return False, "plugin/skills/ 不存在，需先同步"
-    stale = [n for n in names if not (out / n).is_dir()]
-    extra = [p.name for p in out.iterdir() if p.name not in names]
+    stale = sorted(n for n in names if not (out / n).is_dir())
+    extra = sorted(p.name for p in out.iterdir() if p.name not in names)
     if stale or extra:
         return False, f"目录不一致（缺：{stale}；多：{extra}）"
+
+    def norm(p: Path) -> bytes:
+        return p.read_bytes().replace(b"\r\n", b"\n")
+
+    def rel_files(root: Path) -> dict[str, Path]:
+        return {
+            str(p.relative_to(root)).replace("\\", "/"): p
+            for p in sorted(root.rglob("*"))
+            if p.is_file()
+        }
+
     for name, src in skill_source_dirs():
-        cmp = filecmp.dircmp(src, out / name)
-        _, mismatch, errors = filecmp.cmpfiles(
-            src, out / name,
-            [f for f in cmp.left_list if (src / f).is_file()],
-            shallow=False,
-        )
-        if mismatch or errors:
-            return False, f"{name} 内容不一致（mismatch={mismatch}，errors={errors}）"
-        # 递归子目录
-        for sub in cmp.subdirs.values():
-            if sub.left_only or sub.right_only or sub.funny_files:
-                return False, f"{name}/{sub.name} 子目录不一致"
+        dst = out / name
+        left, right = rel_files(src), rel_files(dst)
+        only_l = sorted(set(left) - set(right))
+        only_r = sorted(set(right) - set(left))
+        if only_l or only_r:
+            return False, f"{name} 文件集不一致（源独有 {only_l}，拷贝独有 {only_r}）"
+        diff = [rel for rel in left if norm(left[rel]) != norm(right[rel])]
+        if diff:
+            return False, f"{name} 内容不一致：{diff[:5]}"
     return True, ""
 
 
