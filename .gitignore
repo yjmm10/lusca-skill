@@ -3,3 +3,6 @@ examples
 outputs
 .claude
 .env
+__pycache__/
+*.pyc
+skills/dev/lucas-product-site-workspace/
