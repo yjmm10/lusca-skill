@@ -42,13 +42,13 @@ allowed-tools: Read, Write, Edit, Bash, Glob, Grep, WebSearch, WebFetch
 
 按 `references/data-contract.md` 把来源数据映射成统一 schema；运行 `scripts/normalize_data.py` 校验并生成 `src/data/highlights.json`。每条指标保留 `label/value/unit/period/source`，每条动态保留 `date/title/summary/source`，允许追溯来源。字段缺失时留空或标示例，不补造。
 
-### 4. 调研 UI 组件
+### 4. 生成骨架
 
-按 `references/ui-research.md` 检索官方组件库文档与技术博客，至少 3 个核心来源；用“可维护性 / 无障碍 / 包体 / 主题与 i18n / 许可证 / 与 Astro 集成”六维比较。结论落到 `docs/ui-decisions.md`。默认优先 Tailwind 样式层 + 原生 Astro 组件；只在图表、表格、轮播等确有收益时引入 React 岛屿或轻量组件。
+运行 `scripts/init_project.py` 创建项目。脚本负责稳定结构，不替代设计判断；随后按产品数据替换示例文案、图片和颜色，并把组件调研结论落到代码。**先落骨架再调研**：骨架与三页是可交付底线，组件调研的结论可以之后写进 `docs/ui-decisions.md`；不要在手写整站上消耗大量时间，也不要让调研阻塞骨架产出。
 
-### 5. 生成骨架
+### 5. 调研 UI 组件
 
-运行 `scripts/init_project.py` 创建项目。脚本负责稳定结构，不替代设计判断；随后按产品数据替换示例文案、图片和颜色，并把组件调研结论落到代码。
+按 `references/ui-research.md` 检索官方组件库文档与技术博客，至少 3 个核心来源；用“可维护性 / 无障碍 / 包体 / 主题与 i18n / 许可证 / 与 Astro 集成”六维比较。结论落到 `docs/ui-decisions.md`。默认优先 Tailwind 样式层 + 原生 Astro 组件；只在图表、表格、轮播等确有收益时引入 React 岛屿或轻量组件。检索时间控制在少数几次调用内，够支撑决策即可。
 
 ### 6. 页面与视觉
 
@@ -88,7 +88,7 @@ python <skill>/scripts/capture_screenshots.py <目标目录> --url http://localh
 |------|-----------|
 | `references/naming-brand.md` | 第 2 步起名、检查撞名、确定 logo 意象时 |
 | `references/data-contract.md` | 第 3 步把任意来源映射为产品数据、派生落地页最新内容时 |
-| `references/ui-research.md` | 第 4 步联网调研组件、写 `docs/ui-decisions.md` 时 |
+| `references/ui-research.md` | 第 5 步联网调研组件、写 `docs/ui-decisions.md` 时 |
 | `references/architecture-pages.md` | 第 6 步设计三页信息层级、组件边界与交互动效时 |
 | `references/seo-geo.md` | 第 7 步配置 SEO/GEO、结构化数据与索引文件时 |
 | `references/i18n-theme.md` | 第 7 步做中英文与深浅主题、避免 FOUC 时 |

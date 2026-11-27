@@ -117,6 +117,10 @@ def main() -> int:
     missing_seo = [marker for marker in seo_markers if marker not in layout]
     check("SEO/theme markers in layout", not missing_seo, ", ".join(missing_seo))
 
+    logo_svg = read(root / "public/logo.svg")
+    rich_icon = ("linearGradient" in logo_svg or "radialGradient" in logo_svg) or logo_svg.count("<path") + logo_svg.count("<ellipse") + logo_svg.count("<circle") >= 3
+    check("logo has layered icon elements", rich_icon, "needs gradient or >=3 shape elements")
+
     astro_config = read(root / "astro.config.mjs")
     check("static output and i18n routing", "output: 'static'" in astro_config and "locales: ['zh', 'en']" in astro_config)
 

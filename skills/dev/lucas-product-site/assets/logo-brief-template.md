@@ -12,9 +12,11 @@ tone: "{{BRAND_TONE}}"
 
 ## 图形
 
-- 主符号：{{PRIMARY_SYMBOL}}
+- 主符号：{{PRIMARY_SYMBOL}}（必须承载名字含义，不用单一几何形）
+- 辅助元素：{{SUPPORTING_ELEMENTS}}（如轨道、节点、光斑、描边、内发光，至少 2 层）
 - 字标：{{WORDMARK_TREATMENT}}
-- 品牌色：{{BRAND_COLOR}}；中性色沿用设计 token。
+- 品牌色：{{BRAND_COLOR}}；中性色沿用设计 token；允许克制的渐变，避免复杂纹理。
+- 缩放：32px 下主符号仍可辨认。
 - 深浅主题：符号在两种背景下都保持识别度，必要时调整透明度而非换形状。
 
 ## 交付文件

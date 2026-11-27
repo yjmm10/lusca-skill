@@ -1,0 +1,35 @@
+{
+  "expectations": [
+    {
+      "text": "At least 3 short name candidates and one recommendation are documented",
+      "passed": true,
+      "evidence": "bold candidate bullets=11, recommendation present=True, brand docs=['brand.md']"
+    },
+    {
+      "text": "Logo SVG and PNG exist and the brand doc explains their concept",
+      "passed": true,
+      "evidence": "svg=True, png=True, concept explained=True"
+    },
+    {
+      "text": "Chinese landing page and English /en/ landing page both exist",
+      "passed": true,
+      "evidence": "zh landing=True, en landing=True"
+    },
+    {
+      "text": "SEO/GEO includes canonical, hreflang, JSON-LD and llms.txt",
+      "passed": true,
+      "evidence": "canonical=True, hreflang=True, json-ld=True, llms.txt=True"
+    },
+    {
+      "text": "Performance or cache configuration is present",
+      "passed": true,
+      "evidence": "cache/perf artifacts found=True"
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 0,
+    "total": 5,
+    "pass_rate": 1.0
+  }
+}

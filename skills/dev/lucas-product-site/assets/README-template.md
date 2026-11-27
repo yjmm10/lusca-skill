@@ -1,11 +1,11 @@
 ---
-name: {{PRODUCT_NAME}}
-description: {{PRODUCT_TAGLINE_ZH}}
+name: __PRODUCT_NAME__
+description: __PRODUCT_TAGLINE_ZH__
 ---
 
-# {{PRODUCT_NAME}}
+# __PRODUCT_NAME__
 
-{{PRODUCT_NAME}} 是{{PRODUCT_SUMMARY_ZH}}站点包含落地页、数据页与关于页，默认中文，`/en/` 为英文。
+__PRODUCT_NAME__ 是__PRODUCT_SUMMARY_ZH__站点包含落地页、数据页与关于页，默认中文，`/en/` 为英文。
 
 ## 快速开始
 

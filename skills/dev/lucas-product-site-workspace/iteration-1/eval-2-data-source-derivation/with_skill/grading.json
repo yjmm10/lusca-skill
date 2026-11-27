@@ -1,0 +1,35 @@
+{
+  "expectations": [
+    {
+      "text": "Example product data is copied and normalized to the required schema",
+      "passed": true,
+      "evidence": "sample copies=1, normalized files=['site\\\\src\\\\data\\\\product.json']"
+    },
+    {
+      "text": "Derived highlights contain no metric values absent from the source data",
+      "passed": true,
+      "evidence": "source values=['36', '42', '99.98'], unknown derived values=none"
+    },
+    {
+      "text": "Landing page reads derived highlights instead of hardcoding metric values",
+      "passed": true,
+      "evidence": "highlights.json referenced in 6 astro files; JSON-driven render refs in 0 files; hardcoded metric hits=0"
+    },
+    {
+      "text": "UI decision document cites at least 3 sources and states a tradeoff",
+      "passed": true,
+      "evidence": "docs=['ui-decisions.md'], links=3, tradeoff/limits mentioned=True"
+    },
+    {
+      "text": "Data page displays source and period for metrics",
+      "passed": true,
+      "evidence": "period refs in 11 files; source refs in 20 files"
+    }
+  ],
+  "summary": {
+    "passed": 5,
+    "failed": 0,
+    "total": 5,
+    "pass_rate": 1.0
+  }
+}

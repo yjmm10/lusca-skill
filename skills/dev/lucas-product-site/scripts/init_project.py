@@ -13,6 +13,7 @@ import importlib.util
 import json
 import shutil
 import struct
+import sys
 import zlib
 from pathlib import Path
 from textwrap import dedent
@@ -51,11 +52,68 @@ def esc(text: str) -> str:
     )
 
 
-def make_png(path: Path, size: int = 512) -> None:
-    """Write a simple brand PNG using only the standard library.
+def _star_points(cx: float, cy: float, scale: float, samples: int = 24) -> list[tuple[float, float]]:
+    """Sample the four-point concave sparkle (same curves as the SVG logo)."""
+    segs = [
+        ((0.0, -108.0), (15.0, -36.0), (36.0, -15.0), (108.0, 0.0)),
+        ((108.0, 0.0), (36.0, 15.0), (15.0, 36.0), (0.0, 108.0)),
+        ((0.0, 108.0), (-15.0, 36.0), (-36.0, 15.0), (-108.0, 0.0)),
+        ((-108.0, 0.0), (-36.0, -15.0), (-15.0, -36.0), (0.0, -108.0)),
+    ]
+    pts: list[tuple[float, float]] = []
+    for p0, c1, c2, p1 in segs:
+        for i in range(samples):
+            t = i / samples
+            mt = 1 - t
+            x = mt**3 * p0[0] + 3 * mt**2 * t * c1[0] + 3 * mt * t**2 * c2[0] + t**3 * p1[0]
+            y = mt**3 * p0[1] + 3 * mt**2 * t * c1[1] + 3 * mt * t**2 * c2[1] + t**3 * p1[1]
+            pts.append((cx + x * scale, cy + y * scale))
+    return pts
 
-    The SVG remains the editable master; this raster version guarantees a real PNG
-    deliverable even when cairosvg/ImageMagick is unavailable.
+
+def _point_in_polygon(x: float, y: float, poly: list[tuple[float, float]]) -> bool:
+    inside = False
+    j = len(poly) - 1
+    for i, (xi, yi) in enumerate(poly):
+        xj, yj = poly[j]
+        if (yi > y) != (yj > y) and x < (xj - xi) * (y - yi) / (yj - yi + 1e-12) + xi:
+            inside = not inside
+        j = i
+    return inside
+
+
+def _lerp(a: tuple[int, int, int], b: tuple[int, int, int], t: float) -> tuple[int, int, int]:
+    return tuple(int(a[i] + (b[i] - a[i]) * t) for i in range(3))  # type: ignore[return-value]
+
+
+def _badge_gradient(t: float) -> tuple[int, int, int]:
+    sky_light, sky, indigo = (56, 189, 248), (14, 165, 233), (99, 102, 241)
+    if t < 0.55:
+        return _lerp(sky_light, sky, t / 0.55)
+    return _lerp(sky, indigo, (t - 0.55) / 0.45)
+
+
+def _blend(dst: bytearray, index: int, color: tuple[int, int, int], alpha: float) -> None:
+    if alpha <= 0:
+        return
+    for i in range(3):
+        dst[index + i] = int(dst[index + i] * (1 - alpha) + color[i] * alpha)
+
+
+def _inside_rounded(x: float, y: float, x0: float, y0: float, x1: float, y1: float, r: float) -> bool:
+    if x < x0 or x > x1 or y < y0 or y > y1:
+        return False
+    cx = min(max(x, x0 + r), x1 - r)
+    cy = min(max(y, y0 + r), y1 - r)
+    dx, dy = x - cx, y - cy
+    return dx * dx + dy * dy <= r * r
+
+
+def make_png(path: Path, size: int = 512) -> None:
+    """Write the brand logo PNG using only the standard library.
+
+    Composition mirrors logo.svg: gradient badge, orbit ring, concave sparkle,
+    orbit nodes, and a core dot. The SVG stays the editable master.
     """
     try:
         import cairosvg  # type: ignore
@@ -67,48 +125,65 @@ def make_png(path: Path, size: int = 512) -> None:
         pass
 
     width = height = size
+    s = size / 512.0
+    center = (256 * s, 262 * s)
+    a, b = 152 * s, 56 * s
+    import math
+
+    theta = math.radians(-18)
+    cos_t, sin_t = math.cos(theta), math.sin(theta)
+    star = _star_points(center[0], center[1], s)
+    star_box = (
+        min(p[0] for p in star) - 2,
+        min(p[1] for p in star) - 2,
+        max(p[0] for p in star) + 2,
+        max(p[1] for p in star) + 2,
+    )
+    star_ys = (star_box[1], star_box[3])
+    nodes = [
+        (center[0] + a * cos_t, center[1] + a * sin_t, 17 * s, 1.0),
+        (center[0] - a * cos_t, center[1] - a * sin_t, 11 * s, 0.85),
+    ]
+
     rows: list[bytearray] = []
-    brand = (14, 165, 233)
-    white = (255, 255, 255)
-
-    def inside_rounded(x: float, y: float, x0: float, y0: float, x1: float, y1: float, r: float) -> bool:
-        cx = min(max(x, x0 + r), x1 - r)
-        cy = min(max(y, y0 + r), y1 - r)
-        dx, dy = x - cx, y - cy
-        if x < x0 or x > x1 or y < y0 or y > y1:
-            return False
-        if x < x0 + r and y < y0 + r:
-            return dx * dx + dy * dy <= r * r
-        if x > x1 - r and y < y0 + r:
-            return dx * dx + dy * dy <= r * r
-        if x < x0 + r and y > y1 - r:
-            return dx * dx + dy * dy <= r * r
-        if x > x1 - r and y > y1 - r:
-            return dx * dx + dy * dy <= r * r
-        return True
-
-    def near_segment(x: float, y: float, ax: float, ay: float, bx: float, by: float, width_px: float) -> bool:
-        vx, vy = bx - ax, by - ay
-        wx, wy = x - ax, y - ay
-        length_sq = vx * vx + vy * vy
-        t = max(0.0, min(1.0, (wx * vx + wy * vy) / length_sq)) if length_sq else 0.0
-        px, py = ax + t * vx, ay + t * vy
-        return (x - px) ** 2 + (y - py) ** 2 <= (width_px / 2) ** 2
-
     for y in range(height):
         row = bytearray([0])
         for x in range(width):
-            if inside_rounded(x + 0.5, y + 0.5, 40, 40, 472, 472, 104):
-                color = brand
-                if (
-                    near_segment(x, y, 150, 350, 256, 150, 34)
-                    or near_segment(x, y, 256, 150, 362, 350, 34)
-                    or near_segment(x, y, 196, 286, 316, 286, 26)
-                ):
-                    color = white
-                row.extend(color)
-            else:
+            index = 1 + 4 * x
+            px, py = x + 0.5, y + 0.5
+            if not _inside_rounded(px, py, 40 * s, 40 * s, 472 * s, 472 * s, 104 * s):
                 row.extend((0, 0, 0, 0))
+                continue
+            t = ((px - 40 * s) + (py - 40 * s)) / (864 * s)
+            color = _badge_gradient(t)
+            row.extend(color)
+            row.append(255)
+            glow = max(0.0, 1.0 - math.dist((px, py), (170 * s, 150 * s)) / (560 * s))
+            _blend(row, index, (255, 255, 255), 0.22 * glow)
+            if _inside_rounded(px, py, 54 * s, 54 * s, 458 * s, 458 * s, 92 * s) and not _inside_rounded(
+                px, py, 63 * s, 63 * s, 449 * s, 449 * s, 83 * s
+            ):
+                _blend(row, index, (255, 255, 255), 0.22)
+            ex, ey = px - center[0], py - center[1]
+            ux = ex * cos_t - ey * sin_t
+            uy = ex * sin_t + ey * cos_t
+            v = math.hypot(ux / a, uy / b)
+            r_mean = (a + b) / 2
+            if abs(v - 1) * r_mean <= 13 * s:
+                _blend(row, index, (255, 255, 255), 0.55)
+            if abs(v - 1) * r_mean <= 6 * s:
+                _blend(row, index, (255, 255, 255), 0.9)
+            if star_box[0] <= px <= star_box[2] and star_box[1] <= py <= star_box[3] and _point_in_polygon(px, py, star):
+                grad_t = (py - star_ys[0]) / max(1e-6, star_ys[1] - star_ys[0])
+                _blend(row, index, _lerp((255, 255, 255), (219, 234, 254), grad_t), 1.0)
+            for nx, ny, nr, na in nodes:
+                if math.hypot(px - nx, py - ny) <= nr:
+                    _blend(row, index, (255, 255, 255), na)
+            dist_core = math.hypot(px - center[0], py - center[1])
+            if dist_core <= 24 * s:
+                _blend(row, index, (14, 165, 233), 1.0)
+            if abs(dist_core - 27.5 * s) <= 3.5 * s:
+                _blend(row, index, (255, 255, 255), 1.0)
         rows.append(row)
 
     def chunk(kind: bytes, data: bytes) -> bytes:
@@ -123,26 +198,66 @@ def make_png(path: Path, size: int = 512) -> None:
 
 
 def make_og_png(path: Path, width: int = 1200, height: int = 630) -> None:
-    """Write a simple social-share PNG without external image libraries."""
+    """Write a 1200x630 social-share image: gradient backdrop, brand badge,
+    and a soft product-card silhouette. Standard library only."""
+    import math
+
     rows: list[bytearray] = []
-    center_x, center_y, radius = width * 0.28, height / 2, 132.0
+    badge_c = (330.0, 315.0)
+    badge_r = 150.0
+    a, b = 112.0, 42.0
+    theta = math.radians(-18)
+    cos_t, sin_t = math.cos(theta), math.sin(theta)
+    star = _star_points(badge_c[0], badge_c[1], 0.62)
+    star_box = (
+        min(p[0] for p in star) - 2,
+        min(p[1] for p in star) - 2,
+        max(p[0] for p in star) + 2,
+        max(p[1] for p in star) + 2,
+    )
+    card = (560.0, 110.0, 1140.0, 520.0, 36.0)
+    bars = [
+        (600.0, 160.0, 200.0, 34.0, (14, 165, 233), 1.0),
+        (600.0, 226.0, 420.0, 26.0, (203, 213, 225), 1.0),
+        (600.0, 280.0, 340.0, 26.0, (226, 232, 240), 1.0),
+        (600.0, 334.0, 460.0, 26.0, (226, 232, 240), 1.0),
+        (600.0, 388.0, 260.0, 26.0, (203, 213, 225), 1.0),
+    ]
+    r_mean = (a + b) / 2
+
     for y in range(height):
         row = bytearray([0])
         for x in range(width):
-            t = x / width
-            base = (
-                int(14 + (8 - 14) * t),
-                int(165 + (15 - 165) * t),
-                int(233 + (30 - 233) * t),
-            )
-            distance = ((x - center_x) ** 2 + (y - center_y) ** 2) ** 0.5
-            if radius - 18 <= distance <= radius:
-                color = (255, 255, 255)
-            elif distance < radius - 18:
-                color = base
-            else:
-                color = base
-            row.extend(color)
+            index = 1 + 3 * x
+            px, py = x + 0.5, y + 0.5
+            t = (px / width + py / height) / 2
+            row.extend(_badge_gradient(t))
+            dist = math.hypot(px - badge_c[0], py - badge_c[1])
+            if dist <= badge_r:
+                bt = 0.9 * (0.5 + ((px - badge_c[0]) + (py - badge_c[1])) / (4 * badge_r))
+                bt = max(0.0, min(1.0, bt))
+                _blend(row, index, _badge_gradient(bt), 1.0)
+                ex, ey = px - badge_c[0], py - badge_c[1]
+                ux = ex * cos_t - ey * sin_t
+                uy = ex * sin_t + ey * cos_t
+                v = math.hypot(ux / a, uy / b)
+                if abs(v - 1) * r_mean <= 5.0:
+                    _blend(row, index, (255, 255, 255), 0.85)
+                if star_box[0] <= px <= star_box[2] and star_box[1] <= py <= star_box[3] and _point_in_polygon(px, py, star):
+                    _blend(row, index, (255, 255, 255), 1.0)
+                dist_core = math.hypot(px - badge_c[0], py - badge_c[1])
+                if dist_core <= 13.0:
+                    _blend(row, index, (14, 165, 233), 1.0)
+                if abs(dist_core - 16.0) <= 2.4:
+                    _blend(row, index, (255, 255, 255), 1.0)
+            if dist <= badge_r + 10 and dist > badge_r:
+                _blend(row, index, (255, 255, 255), 0.12)
+            x0, y0, x1, y1, rad = card
+            if _inside_rounded(px, py, x0, y0, x1, y1, rad):
+                _blend(row, index, (255, 255, 255), 0.93)
+                for bx0, by0, bw, bh, bcolor, balpha in bars:
+                    if _inside_rounded(px, py, bx0, by0, bx0 + bw, by0 + bh, bh / 2):
+                        _blend(row, index, bcolor, balpha)
         rows.append(row)
 
     def chunk(kind: bytes, data: bytes) -> bytes:
@@ -182,25 +297,25 @@ PACKAGE_JSON = """{
     "check": "astro check"
   },
   "dependencies": {
-    "astro": "^5.0.0"
+    "astro": "^5.0.0",
+    "tailwindcss": "^4.0.0",
+    "@tailwindcss/vite": "^4.0.0"
   },
   "devDependencies": {
-    "@astrojs/tailwind": "^5.1.0",
     "@playwright/test": "^1.48.0",
-    "tailwindcss": "^3.4.0",
     "typescript": "^5.6.0"
   }
 }
 """
 
 ASTRO_CONFIG = """import { defineConfig } from 'astro/config';
-import tailwind from '@astrojs/tailwind';
+import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
   site: '__SITE__',
   base: '__BASE__',
   output: 'static',
-  integrations: [tailwind({ applyBaseStyles: false })],
+  vite: { plugins: [tailwindcss()] },
   i18n: {
     defaultLocale: 'zh',
     locales: ['zh', 'en'],
@@ -210,91 +325,157 @@ export default defineConfig({
 });
 """
 
-TAILWIND_CONFIG = """/** @type {import('tailwindcss').Config} */
-export default {
-  content: ['./src/**/*.{astro,html,js,jsx,ts,tsx,md,mdx}'],
-  darkMode: ['class', '[data-theme="dark"]'],
-  theme: {
-    extend: {
-      colors: {
-        bg: 'rgb(var(--bg) / <alpha-value>)',
-        surface: 'rgb(var(--surface) / <alpha-value>)',
-        mutedSurface: 'rgb(var(--surface-muted) / <alpha-value>)',
-        fg: 'rgb(var(--fg) / <alpha-value>)',
-        muted: 'rgb(var(--muted) / <alpha-value>)',
-        brand: 'rgb(var(--brand) / <alpha-value>)',
-        'brand-strong': 'rgb(var(--brand-strong) / <alpha-value>)',
-      },
-      fontFamily: {
-        sans: ['Inter', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', 'system-ui', 'sans-serif'],
-        mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
-      },
-      maxWidth: { site: 'var(--max-width)' },
-      borderRadius: { sm: 'var(--radius-sm)', md: 'var(--radius-md)', lg: 'var(--radius-lg)' },
-    },
-  },
-  plugins: [],
+TAILWIND_CONFIG = """/* Tailwind v4 is configured CSS-first in src/styles/global.css
+   (@import 'tailwindcss', @custom-variant dark, @theme).
+   This file only documents the mapping for future editors. */
+export const theme = {
+  darkVariant: '[data-theme="dark"]',
+  brandColor: 'rgb(var(--brand) / <alpha-value>)',
 };
 """
 
 GLOBAL_CSS = """@import './tokens.css';
+@import 'tailwindcss';
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@custom-variant dark ([data-theme="dark"] &);
+
+@theme {
+  --color-bg: rgb(var(--bg));
+  --color-surface: rgb(var(--surface));
+  --color-mutedsurface: rgb(var(--surface-muted));
+  --color-fg: rgb(var(--fg));
+  --color-muted: rgb(var(--muted));
+  --color-brand: rgb(var(--brand));
+  --color-brand-strong: rgb(var(--brand-strong));
+  --font-sans: Inter, 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --breakpoint-sm: 40rem;
+  --breakpoint-md: 48rem;
+  --breakpoint-lg: 64rem;
+  --breakpoint-xl: 80rem;
+}
 
 :root { font-family: var(--font-sans); background: rgb(var(--bg)); color: rgb(var(--fg)); }
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
-body { margin: 0; min-height: 100vh; background: rgb(var(--bg)); color: rgb(var(--fg)); line-height: 1.65; }
+body { margin: 0; min-height: 100vh; background: rgb(var(--bg)); color: rgb(var(--fg)); line-height: 1.65; -webkit-font-smoothing: antialiased; }
 a { color: inherit; text-decoration: none; }
 img { max-width: 100%; height: auto; display: block; }
+::selection { background: rgb(var(--brand) / 0.25); }
 .site-shell { width: min(calc(100% - 3rem), var(--max-width)); margin: 0 auto; }
-.site-header { position: sticky; top: 0; z-index: 30; border-bottom: 1px solid rgb(var(--border)); background: rgb(var(--bg) / 0.88); backdrop-filter: blur(14px); }
-.header-inner { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; min-height: 4.5rem; }
-.brand { display: inline-flex; align-items: center; gap: 0.65rem; font-weight: 750; letter-spacing: -0.02em; }
-.brand img { width: 2rem; height: 2rem; }
-.nav { display: flex; align-items: center; gap: 1.25rem; font-size: 0.9rem; color: rgb(var(--muted)); }
+
+.site-header { position: sticky; top: 0; z-index: 30; border-bottom: 1px solid rgb(var(--border)); background: rgb(var(--bg) / 0.85); backdrop-filter: blur(14px); }
+.header-inner { display: flex; align-items: center; justify-content: space-between; gap: 1.5rem; min-height: 4.25rem; }
+.brand { display: inline-flex; align-items: center; gap: 0.6rem; font-weight: 750; letter-spacing: -0.02em; }
+.brand img { width: 2.1rem; height: 2.1rem; border-radius: 0.6rem; }
+.nav { display: flex; align-items: center; gap: 1.35rem; font-size: 0.9rem; color: rgb(var(--muted)); }
+.nav a { transition: color 150ms ease; }
 .nav a:hover { color: rgb(var(--fg)); }
-.nav-actions { display: flex; align-items: center; gap: 0.6rem; }
-.pill { display: inline-flex; align-items: center; justify-content: center; min-height: 2.25rem; padding: 0 0.9rem; border: 1px solid rgb(var(--border)); border-radius: 999px; background: rgb(var(--surface)); font-size: 0.85rem; cursor: pointer; }
+.nav-actions { display: flex; align-items: center; gap: 0.55rem; }
+.pill { display: inline-flex; align-items: center; justify-content: center; min-height: 2.25rem; padding: 0 0.85rem; border: 1px solid rgb(var(--border)); border-radius: 999px; background: rgb(var(--surface)); font-size: 0.85rem; cursor: pointer; transition: border-color 150ms ease; }
 .pill:hover { border-color: rgb(var(--brand)); }
 main { display: block; }
-.hero { padding: clamp(4rem, 10vw, 8rem) 0 3.5rem; }
-.hero-grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); gap: clamp(2rem, 5vw, 4rem); align-items: center; }
-.eyebrow { display: inline-flex; align-items: center; gap: 0.45rem; color: rgb(var(--brand-strong)); font-size: 0.78rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
-h1 { font-size: clamp(2.6rem, 6vw, 4.5rem); line-height: 1.08; letter-spacing: -0.045em; margin: 1rem 0; max-width: 16ch; }
-h2 { font-size: clamp(1.8rem, 3vw, 2.7rem); line-height: 1.18; letter-spacing: -0.03em; margin: 0 0 0.75rem; }
-h3 { font-size: 1.1rem; line-height: 1.35; margin: 0 0 0.5rem; }
-.lede { font-size: clamp(1.05rem, 1.8vw, 1.25rem); color: rgb(var(--muted)); max-width: 56ch; }
-.cta-row { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 2rem; }
-.button { display: inline-flex; align-items: center; justify-content: center; min-height: 2.9rem; padding: 0 1.25rem; border-radius: var(--radius-sm); font-weight: 650; font-size: 0.94rem; }
-.button-primary { background: rgb(var(--brand)); color: white; }
+
+.hero { position: relative; padding: clamp(4.5rem, 9vw, 7.5rem) 0 4rem; overflow: hidden; }
+.hero::before { content: ""; position: absolute; inset: 0; background: radial-gradient(640px 340px at 10% -6%, rgb(var(--brand) / 0.16), transparent 62%), radial-gradient(760px 400px at 96% 6%, rgb(var(--brand-2) / 0.14), transparent 58%); pointer-events: none; }
+.hero::after { content: ""; position: absolute; inset: 0; background-image: linear-gradient(rgb(var(--fg) / 0.05) 1px, transparent 1px), linear-gradient(90deg, rgb(var(--fg) / 0.05) 1px, transparent 1px); background-size: 42px 42px; -webkit-mask-image: radial-gradient(760px 440px at 28% -2%, #000 25%, transparent 72%); mask-image: radial-gradient(760px 440px at 28% -2%, #000 25%, transparent 72%); pointer-events: none; }
+.hero-grid { position: relative; display: grid; grid-template-columns: minmax(0, 1.02fr) minmax(0, 0.98fr); gap: clamp(2.5rem, 5vw, 4.5rem); align-items: center; }
+.hero-grid > * { position: relative; z-index: 1; }
+.eyebrow { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0.95rem; border: 1px solid rgb(var(--brand) / 0.35); border-radius: 999px; background: rgb(var(--brand) / 0.08); color: rgb(var(--brand-strong)); font-size: 0.8rem; font-weight: 650; letter-spacing: 0.08em; text-transform: uppercase; }
+.eyebrow::before { content: ""; width: 0.5rem; height: 0.5rem; border-radius: 999px; background: rgb(var(--brand)); box-shadow: 0 0 0 4px rgb(var(--brand) / 0.18); }
+h1 { font-size: clamp(2.7rem, 6vw, 4.3rem); line-height: 1.06; letter-spacing: -0.045em; margin: 1.4rem 0 1.1rem; max-width: 18ch; }
+.grad-text { background: linear-gradient(92deg, rgb(var(--fg)) 0%, rgb(var(--fg)) 35%, rgb(var(--brand)) 68%, rgb(var(--brand-2)) 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+h2 { font-size: clamp(1.9rem, 3vw, 2.6rem); line-height: 1.16; letter-spacing: -0.032em; margin: 0 0 0.7rem; }
+h3 { font-size: 1.08rem; line-height: 1.35; margin: 0 0 0.5rem; }
+.lede { font-size: clamp(1.05rem, 1.7vw, 1.22rem); color: rgb(var(--muted)); max-width: 54ch; }
+.cta-row { display: flex; flex-wrap: wrap; gap: 0.8rem; margin-top: 2.1rem; }
+.cta-row.center { justify-content: center; }
+.button { display: inline-flex; align-items: center; justify-content: center; min-height: 3rem; padding: 0 1.4rem; border-radius: var(--radius-sm); font-weight: 650; font-size: 0.95rem; transition: transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease; }
+.button:hover { transform: translateY(-1px); }
+.button-primary { background: linear-gradient(135deg, rgb(var(--brand)), rgb(var(--brand-2))); color: #fff; box-shadow: 0 10px 24px rgb(var(--brand) / 0.32); }
+.button-primary:hover { box-shadow: 0 14px 30px rgb(var(--brand) / 0.4); }
 .button-secondary { border: 1px solid rgb(var(--border)); background: rgb(var(--surface)); }
-.section { padding: clamp(3.5rem, 7vw, 6rem) 0; }
-.section-muted { background: rgb(var(--surface-muted)); border-block: 1px solid rgb(var(--border)); }
-.section-head { display: flex; align-items: end; justify-content: space-between; gap: 1.5rem; margin-bottom: 2rem; }
-.section-note { color: rgb(var(--muted)); font-size: 0.9rem; max-width: 48ch; }
-.grid { display: grid; gap: 1rem; }
+.button-secondary:hover { border-color: rgb(var(--brand)); }
+.button-invert { background: #fff; color: rgb(var(--brand-strong)); box-shadow: 0 12px 28px rgb(0 0 0 / 0.22); }
+.hero-meta { display: flex; flex-wrap: wrap; gap: 0.55rem; margin-top: 1.9rem; }
+.meta-chip { display: inline-flex; align-items: center; gap: 0.45rem; padding: 0.42rem 0.85rem; border: 1px solid rgb(var(--border)); border-radius: 999px; background: rgb(var(--surface) / 0.7); color: rgb(var(--muted)); font-size: 0.8rem; }
+.meta-chip::before { content: ""; width: 0.42rem; height: 0.42rem; border-radius: 999px; background: rgb(var(--success)); }
+
+.window { border: 1px solid rgb(var(--border)); border-radius: var(--radius-lg); background: rgb(var(--surface)); box-shadow: var(--shadow-md), 0 40px 80px rgb(var(--brand) / 0.10); overflow: hidden; }
+.window-bar { display: flex; align-items: center; gap: 0.9rem; padding: 0.7rem 1rem; border-bottom: 1px solid rgb(var(--border)); background: rgb(var(--surface-muted)); }
+.window-dots { display: inline-flex; gap: 0.42rem; }
+.window-dots i { width: 0.68rem; height: 0.68rem; border-radius: 999px; background: rgb(var(--border)); }
+.window-dots i:nth-child(1) { background: #f87171; }
+.window-dots i:nth-child(2) { background: #fbbf24; }
+.window-dots i:nth-child(3) { background: #34d399; }
+.window-url { flex: 1; max-width: 26rem; margin-inline: auto; padding: 0.32rem 0.9rem; border: 1px solid rgb(var(--border)); border-radius: 999px; background: rgb(var(--bg)); color: rgb(var(--muted)); font-size: 0.76rem; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.window-tabs { display: inline-flex; gap: 0.3rem; }
+.window-tab { border: 1px solid rgb(var(--border)); border-radius: 999px; min-width: 2rem; min-height: 1.6rem; padding: 0 0.5rem; background: transparent; color: rgb(var(--muted)); font: inherit; font-size: 0.7rem; cursor: pointer; }
+.window-tab[aria-selected="true"] { background: rgb(var(--brand) / 0.12); border-color: rgb(var(--brand) / 0.5); color: rgb(var(--brand-strong)); }
+.window-stage { position: relative; aspect-ratio: 16 / 10; background: rgb(var(--surface-muted)); }
+.preview-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 200ms ease; }
+.preview-image.active { opacity: 1; }
+
+.section { padding: clamp(3.8rem, 7vw, 6.2rem) 0; }
+.section-muted { position: relative; background: rgb(var(--surface-muted)); border-block: 1px solid rgb(var(--border)); }
+.section-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 1.5rem; margin-bottom: 2.4rem; }
+.section-note { color: rgb(var(--muted)); font-size: 0.92rem; max-width: 52ch; }
+.kicker { display: inline-flex; align-items: center; gap: 0.5rem; color: rgb(var(--brand-strong)); font-size: 0.78rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 0.7rem; }
+.kicker::before { content: ""; width: 1.1rem; height: 2px; border-radius: 2px; background: linear-gradient(90deg, rgb(var(--brand)), rgb(var(--brand-2))); }
+.link-arrow { color: rgb(var(--brand-strong)); font-size: 0.88rem; font-weight: 600; white-space: nowrap; }
+.link-arrow:hover { text-decoration: underline; text-underline-offset: 4px; }
+.grid { display: grid; gap: 1.1rem; }
 .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.card { border: 1px solid rgb(var(--border)); border-radius: var(--radius-md); background: rgb(var(--surface)); padding: 1.5rem; box-shadow: var(--shadow-sm); }
-.metric-value { font-size: 2.1rem; font-weight: 760; letter-spacing: -0.04em; }
-.metric-unit { font-size: 1rem; font-weight: 600; color: rgb(var(--muted)); margin-left: 0.25rem; }
-.metric-meta { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; margin-top: 0.85rem; color: rgb(var(--muted)); font-size: 0.82rem; }
+
+.card { position: relative; border: 1px solid rgb(var(--border)); border-radius: var(--radius-md); background: rgb(var(--surface)); padding: 1.6rem; box-shadow: var(--shadow-sm); transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease; }
+.card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: rgb(var(--brand) / 0.4); }
+.metric-card::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 3px; border-radius: 999px; background: linear-gradient(90deg, rgb(var(--brand)), rgb(var(--brand-2))); opacity: 0; transition: opacity 180ms ease; }
+.metric-card:hover::before { opacity: 1; }
+.metric-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+.metric-icon { display: inline-flex; align-items: center; justify-content: center; width: 2.3rem; height: 2.3rem; border-radius: 0.7rem; background: rgb(var(--brand) / 0.1); color: rgb(var(--brand-strong)); }
+.metric-period { color: rgb(var(--muted)); font-size: 0.78rem; font-variant-numeric: tabular-nums; }
+.metric-label { color: rgb(var(--muted)); font-weight: 600; font-size: 0.92rem; }
+.metric-value { font-size: 2.4rem; font-weight: 770; letter-spacing: -0.045em; line-height: 1.1; margin: 0.2rem 0 1rem; font-variant-numeric: tabular-nums; }
+.metric-unit { font-size: 1rem; font-weight: 600; color: rgb(var(--muted)); margin-left: 0.3rem; letter-spacing: 0; }
+.metric-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.9rem; color: rgb(var(--muted)); font-size: 0.8rem; }
+.delta-pill { display: inline-flex; align-items: center; padding: 0.22rem 0.6rem; border-radius: 999px; background: rgb(var(--success) / 0.12); color: rgb(var(--success)); font-weight: 600; }
 .source-link { color: rgb(var(--brand-strong)); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
-.preview-shell { border: 1px solid rgb(var(--border)); border-radius: var(--radius-lg); background: rgb(var(--surface)); box-shadow: var(--shadow-md); overflow: hidden; }
-.preview-tabs { display: flex; gap: 0.35rem; padding: 0.7rem; border-bottom: 1px solid rgb(var(--border)); background: rgb(var(--surface-muted)); }
-.preview-tab { border: 0; border-radius: var(--radius-sm); padding: 0.5rem 0.8rem; background: transparent; color: rgb(var(--muted)); font: inherit; font-size: 0.82rem; cursor: pointer; }
-.preview-tab[aria-selected="true"] { background: rgb(var(--surface)); color: rgb(var(--fg)); box-shadow: var(--shadow-sm); }
-.preview-stage { position: relative; aspect-ratio: 16 / 10; background: rgb(var(--surface-muted)); }
-.preview-image { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 180ms ease; }
-.preview-image.active { opacity: 1; }
-.news-item { display: grid; grid-template-columns: 7rem minmax(0, 1fr); gap: 1rem; padding: 1.15rem 0; border-bottom: 1px solid rgb(var(--border)); }
-.news-date { color: rgb(var(--muted)); font-size: 0.82rem; font-variant-numeric: tabular-nums; }
-.news-title { font-weight: 650; }
+
+.news-list { display: grid; gap: 0.9rem; }
+.news-card { display: grid; grid-template-columns: 8.2rem minmax(0, 1fr); gap: 1.2rem; align-items: start; padding: 1.3rem 1.4rem; border: 1px solid rgb(var(--border)); border-radius: var(--radius-md); background: rgb(var(--surface)); box-shadow: var(--shadow-sm); transition: border-color 160ms ease, transform 160ms ease; }
+.news-card:hover { border-color: rgb(var(--brand) / 0.45); transform: translateY(-2px); }
+.date-pill { display: inline-flex; justify-content: center; padding: 0.4rem 0.7rem; border: 1px solid rgb(var(--border)); border-radius: var(--radius-sm); background: rgb(var(--surface-muted)); color: rgb(var(--muted)); font-size: 0.78rem; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.news-title { font-weight: 680; font-size: 1.02rem; }
+.news-link:hover { color: rgb(var(--brand-strong)); }
 .news-summary { color: rgb(var(--muted)); font-size: 0.92rem; margin-top: 0.35rem; }
+.news-tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.7rem; }
+.tag-chip { padding: 0.18rem 0.6rem; border-radius: 999px; background: rgb(var(--brand) / 0.08); border: 1px solid rgb(var(--brand) / 0.25); color: rgb(var(--brand-strong)); font-size: 0.72rem; font-weight: 600; }
+
+.feature-icon { display: inline-flex; align-items: center; justify-content: center; width: 2.6rem; height: 2.6rem; margin-bottom: 1.1rem; border-radius: 0.8rem; background: linear-gradient(135deg, rgb(var(--brand) / 0.14), rgb(var(--brand-2) / 0.14)); color: rgb(var(--brand-strong)); }
+
+.faq { max-width: 52rem; }
+.faq details { border-bottom: 1px solid rgb(var(--border)); padding: 1.05rem 0; }
+.faq summary { cursor: pointer; font-weight: 650; list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.faq summary::after { content: "+"; color: rgb(var(--brand-strong)); font-size: 1.2rem; }
+.faq details[open] summary::after { content: "–"; }
+.faq p { color: rgb(var(--muted)); margin-top: 0.6rem; }
+
+.cta-band { position: relative; overflow: hidden; border-radius: var(--radius-lg); padding: clamp(2.8rem, 5vw, 4.2rem) clamp(1.6rem, 4vw, 3.5rem); text-align: center; color: #fff; background: linear-gradient(120deg, rgb(var(--brand)) 0%, rgb(var(--brand-2)) 100%); box-shadow: var(--shadow-md); }
+.cta-band::before { content: ""; position: absolute; inset: 0; background-image: radial-gradient(420px 200px at 18% 0%, rgb(255 255 255 / 0.16), transparent 60%), radial-gradient(520px 260px at 92% 100%, rgb(0 0 0 / 0.14), transparent 65%); pointer-events: none; }
+.cta-band h2 { position: relative; color: #fff; }
+.cta-band .cta-note { position: relative; color: rgb(255 255 255 / 0.82); margin: 0.5rem auto 0; }
+.cta-band .cta-row { position: relative; margin-top: 1.8rem; }
+
+.site-footer { border-top: 1px solid rgb(var(--border)); padding: 3rem 0 2.4rem; color: rgb(var(--muted)); font-size: 0.85rem; }
+.footer-grid { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr); gap: 2rem; }
+.footer-brand p { margin: 0.8rem 0 0; max-width: 34ch; }
+.footer-head { font-weight: 700; color: rgb(var(--fg)); font-size: 0.82rem; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 0.8rem; }
+.footer-col a { display: block; padding: 0.22rem 0; }
+.footer-col a:hover { color: rgb(var(--fg)); }
+.footer-meta { text-align: right; }
+
 .table-tools { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1rem; }
 .table-tools input { min-width: min(100%, 22rem); padding: 0.7rem 0.9rem; border: 1px solid rgb(var(--border)); border-radius: var(--radius-sm); background: rgb(var(--surface)); color: rgb(var(--fg)); font: inherit; }
 .table-wrap { overflow-x: auto; border: 1px solid rgb(var(--border)); border-radius: var(--radius-md); background: rgb(var(--surface)); }
@@ -302,21 +483,20 @@ table { width: 100%; border-collapse: collapse; min-width: 46rem; }
 th, td { text-align: left; padding: 0.9rem 1rem; border-bottom: 1px solid rgb(var(--border)); font-size: 0.9rem; vertical-align: top; }
 th { background: rgb(var(--surface-muted)); font-size: 0.78rem; letter-spacing: 0.04em; text-transform: uppercase; color: rgb(var(--muted)); }
 tbody tr:last-child td { border-bottom: 0; }
-.faq details { border-bottom: 1px solid rgb(var(--border)); padding: 1rem 0; }
-.faq summary { cursor: pointer; font-weight: 650; }
-.faq p { color: rgb(var(--muted)); }
-.site-footer { border-top: 1px solid rgb(var(--border)); padding: 2rem 0; color: rgb(var(--muted)); font-size: 0.85rem; }
-[data-reveal] { opacity: 0; transform: translateY(10px); transition: opacity 500ms ease, transform 500ms ease; transition-delay: var(--delay, 0ms); }
+
+[data-reveal] { opacity: 0; transform: translateY(12px); transition: opacity 500ms ease, transform 500ms ease; transition-delay: var(--delay, 0ms); }
 [data-reveal].is-visible { opacity: 1; transform: none; }
-@media (prefers-reduced-motion: reduce) { [data-reveal] { opacity: 1; transform: none; transition: none; } }
+@media (prefers-reduced-motion: reduce) { [data-reveal] { opacity: 1; transform: none; transition: none; } .card:hover, .news-card:hover, .button:hover { transform: none; } }
 @media (max-width: 900px) {
-  .hero-grid, .grid-3, .grid-2 { grid-template-columns: 1fr; }
-  .section-head { align-items: start; flex-direction: column; }
+  .hero-grid, .grid-3, .grid-2, .footer-grid { grid-template-columns: 1fr; }
+  .section-head { align-items: flex-start; flex-direction: column; }
   .nav { display: none; }
+  .footer-meta { text-align: left; }
 }
 @media (max-width: 600px) {
   .site-shell { width: min(calc(100% - 2rem), var(--max-width)); }
-  .news-item { grid-template-columns: 1fr; gap: 0.25rem; }
+  .news-card { grid-template-columns: 1fr; gap: 0.5rem; }
+  .window-url { display: none; }
 }
 """
 
@@ -330,6 +510,15 @@ export const ui = {
     heroSecondary: '了解产品',
     metricsTitle: '核心指标',
     metricsNote: '数据来自产品数据文件，点击来源可核验。',
+    kickerMetrics: '指标',
+    kickerLatest: '动态',
+    kickerFeatures: '能力',
+    viewAll: '查看全部数据',
+    metaMetrics: '项核心指标',
+    metaUpdated: '最近更新',
+    metaVerified: '来源可核验',
+    ctaTitle: '让每个数字都可追溯',
+    ctaNote: '完整数据、统计口径与来源链接都在数据页公开。',
     latestTitle: '最新动态',
     latestNote: '自动取最近更新的三条记录。',
     featuresTitle: '为什么选择它',
@@ -354,6 +543,15 @@ export const ui = {
     heroSecondary: 'About the product',
     metricsTitle: 'Key metrics',
     metricsNote: 'Metrics come from the product data file; follow each source to verify.',
+    kickerMetrics: 'Metrics',
+    kickerLatest: 'Updates',
+    kickerFeatures: 'Capabilities',
+    viewAll: 'View all data',
+    metaMetrics: 'key metrics',
+    metaUpdated: 'Last update',
+    metaVerified: 'Verifiable sources',
+    ctaTitle: 'Make every number traceable',
+    ctaNote: 'Full data, methodology, and source links are public on the data page.',
     latestTitle: 'Latest updates',
     latestNote: 'The three most recent records are derived automatically.',
     featuresTitle: 'Why it works',
@@ -378,6 +576,7 @@ BASE_LAYOUT = """---
 import '../styles/global.css';
 import { ui, type Locale } from '../i18n/ui';
 import product from '../data/product.json';
+import highlights from '../data/highlights.json';
 
 interface Props {
   locale?: Locale;
@@ -398,6 +597,7 @@ const enSuffix = basePath === '/' ? '' : basePath.replace(/\\/$/, '');
 const enUrl = `${site}/en${enSuffix}/`;
 const pageTitle = title ?? `${product.product.name} — ${product.product.tagline[locale]}`;
 const pageDescription = description ?? product.product.summary[locale];
+const lastUpdated = highlights.latest?.[0]?.date;
 const navHref = (suffix: string) => (locale === 'en' ? `/en${suffix}` : suffix);
 const structuredData = [
   {
@@ -475,9 +675,25 @@ const structuredData = [
     </header>
     <main><slot /></main>
     <footer class="site-footer">
-      <div class="site-shell">
-        <p>{product.product.name} · {product.product.tagline[locale]}</p>
-        <p><a class="source-link" href={navHref('/data/')}>{t.nav.data}</a> · <a class="source-link" href={navHref('/about/')}>{t.nav.about}</a></p>
+      <div class="site-shell footer-grid">
+        <div class="footer-brand">
+          <a class="brand" href={navHref('/')}>
+            <img src="/logo.svg" alt="" width="30" height="30" />
+            <span>{product.product.name}</span>
+          </a>
+          <p>{product.product.tagline[locale]}</p>
+        </div>
+        <div class="footer-col">
+          <p class="footer-head">{locale === 'zh' ? '页面' : 'Pages'}</p>
+          <a href={navHref('/')}>{t.nav.home}</a>
+          <a href={navHref('/data/')}>{t.nav.data}</a>
+          <a href={navHref('/about/')}>{t.nav.about}</a>
+        </div>
+        <div class="footer-col footer-meta">
+          <p class="footer-head">{t.updated}</p>
+          <p>{lastUpdated ?? '—'}</p>
+          <p><a href="/llms.txt">llms.txt</a> · <a href="/sitemap.xml">sitemap.xml</a></p>
+        </div>
       </div>
     </footer>
     <script>
@@ -523,14 +739,20 @@ METRIC_CARD = """---
 import type { Locale } from '../i18n/ui';
 interface Props { metric: any; locale: Locale; index?: number }
 const { metric, locale, index = 0 } = Astro.props;
+const sourceLabel = locale === 'zh' ? '来源' : 'Source';
 ---
-<article class="card" data-reveal style={`--delay:${index * 70}ms`}>
-  <h3>{metric.label[locale]}</h3>
+<article class="card metric-card" data-reveal style={`--delay:${index * 70}ms`}>
+  <div class="metric-top">
+    <span class="metric-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l2.4 7.6L22 12l-7.6 2.4L12 22l-2.4-7.6L2 12l7.6-2.4z" /></svg>
+    </span>
+    <span class="metric-period">{metric.period}</span>
+  </div>
+  <h3 class="metric-label">{metric.label[locale]}</h3>
   <p class="metric-value">{metric.value}<span class="metric-unit">{metric.unit ?? ''}</span></p>
   <div class="metric-meta">
-    <span>{metric.period}</span>
-    {metric.delta && <span>{metric.delta}</span>}
-    {metric.source && <a class="source-link" href={metric.source} rel="noopener noreferrer" target="_blank">{locale === 'zh' ? '来源' : 'Source'}</a>}
+    {metric.delta && <span class="delta-pill">{metric.delta}</span>}
+    {metric.source && <a class="source-link" href={metric.source} rel="noopener noreferrer" target="_blank">{sourceLabel}</a>}
   </div>
 </article>
 """
@@ -545,14 +767,15 @@ const formatDate = (value: string) => locale === 'zh'
   ? value.replace(/^(\\d{4})-(\\d{2})-(\\d{2})$/, '$1年$2月$3日')
   : new Date(`${value}T00:00:00Z`).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' });
 ---
-<div>
+<div class="news-list">
   {updates.length === 0 && <p class="section-note">{t.empty}</p>}
   {updates.map((item) => (
-    <article class="news-item" data-reveal>
-      <time class="news-date" datetime={item.date}>{formatDate(item.date)}</time>
+    <article class="news-card" data-reveal>
+      <time class="date-pill" datetime={item.date}>{formatDate(item.date)}</time>
       <div>
-        <p class="news-title">{item.url ? <a class="source-link" href={item.url}>{item.title[locale]}</a> : item.title[locale]}</p>
+        <p class="news-title">{item.url ? <a class="news-link" href={item.url}>{item.title[locale]} <span aria-hidden="true">→</span></a> : item.title[locale]}</p>
         <p class="news-summary">{item.summary[locale]}</p>
+        {item.tags?.length > 0 && <div class="news-tags">{item.tags.map((tag: string) => <span class="tag-chip">{tag}</span>)}</div>}
       </div>
     </article>
   ))}
@@ -565,17 +788,22 @@ import { ui } from '../i18n/ui';
 interface Props { gallery: any[]; locale: Locale }
 const { gallery, locale } = Astro.props;
 const t = ui[locale];
-const items = gallery.length ? gallery : [{ src: '/images/product-preview.svg', alt: { zh: '产品预览示意图', en: 'Illustrative product preview' }, caption: { zh: '请替换为真实截图', en: 'Replace with a real screenshot' } }];
+const items = gallery.length ? gallery : [{ src: '/images/product-preview.svg', alt: { zh: '产品界面预览示意图', en: 'Illustrative product interface preview' }, caption: { zh: '示例界面：请替换为真实产品截图。', en: 'Illustrative UI: replace with a real product screenshot.' } }];
+const urlLabel = locale === 'en' ? 'product · preview' : '产品 · 预览';
 ---
-<div class="preview-shell" data-preview data-reveal>
-  <div class="preview-tabs" role="tablist" aria-label={t.previewTitle}>
-    {items.map((item, index) => (
-      <button class="preview-tab" type="button" role="tab" aria-selected={index === 0} data-preview-tab={index}>
-        {String(index + 1).padStart(2, '0')}
-      </button>
-    ))}
+<div class="window" data-preview data-reveal>
+  <div class="window-bar">
+    <span class="window-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+    <span class="window-url">{urlLabel}</span>
+    <div class="window-tabs" role="tablist" aria-label={t.previewTitle}>
+      {items.map((item, index) => (
+        <button class="window-tab" type="button" role="tab" aria-selected={index === 0} aria-label={`${index + 1}`} data-preview-tab={index}>
+          {String(index + 1).padStart(2, '0')}
+        </button>
+      ))}
+    </div>
   </div>
-  <div class="preview-stage">
+  <div class="window-stage">
     {items.map((item, index) => (
       <img
         class:list={['preview-image', { active: index === 0 }]}
@@ -671,17 +899,31 @@ interface Props { locale: Locale }
 const { locale } = Astro.props;
 const t = ui[locale];
 const path = locale === 'en' ? '/en/' : '/';
+const dataHref = locale === 'en' ? '/en/data/' : '/data/';
+const aboutHref = locale === 'en' ? '/en/about/' : '/about/';
+const lastUpdate = highlights.latest[0]?.date;
+const icons = [
+  'M12 3l7 3v5c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6l7-3zM9 12l2 2 4-4',
+  'M13 2 4 14h6l-1 8 9-12h-6l1-8z',
+  'M5 20v-8M11 20V6M17 20v-9M3 20h18',
+  'M12 3l9 5-9 5-9-5 9-5zM3 14l9 5 9-5',
+];
 ---
 <BaseLayout locale={locale} path={path}>
   <section class="hero">
     <div class="site-shell hero-grid">
       <div>
         <span class="eyebrow">{t.heroEyebrow}</span>
-        <h1>{product.product.tagline[locale]}</h1>
+        <h1><span class="grad-text">{product.product.tagline[locale]}</span></h1>
         <p class="lede">{product.product.summary[locale]}</p>
         <div class="cta-row">
-          <a class="button button-primary" href={locale === 'en' ? '/en/data/' : '/data/'}>{t.heroAction}</a>
-          <a class="button button-secondary" href={locale === 'en' ? '/en/about/' : '/about/'}>{t.heroSecondary}</a>
+          <a class="button button-primary" href={dataHref}>{t.heroAction}</a>
+          <a class="button button-secondary" href={aboutHref}>{t.heroSecondary}</a>
+        </div>
+        <div class="hero-meta">
+          <span class="meta-chip">{highlights.metrics.length} {t.metaMetrics}</span>
+          {lastUpdate && <span class="meta-chip">{t.metaUpdated} · {lastUpdate}</span>}
+          <span class="meta-chip">{t.metaVerified}</span>
         </div>
       </div>
       <ProductPreview gallery={highlights.gallery} locale={locale} />
@@ -691,7 +933,12 @@ const path = locale === 'en' ? '/en/' : '/';
   <section class="section section-muted" id="metrics">
     <div class="site-shell">
       <div class="section-head">
-        <div><h2>{t.metricsTitle}</h2><p class="section-note">{t.metricsNote}</p></div>
+        <div>
+          <span class="kicker">{t.kickerMetrics}</span>
+          <h2>{t.metricsTitle}</h2>
+          <p class="section-note">{t.metricsNote}</p>
+        </div>
+        <a class="link-arrow" href={dataHref}>{t.viewAll} →</a>
       </div>
       <div class="grid grid-3">
         {highlights.metrics.map((metric, index) => <MetricCard metric={metric} locale={locale} index={index} />)}
@@ -702,7 +949,12 @@ const path = locale === 'en' ? '/en/' : '/';
   <section class="section" id="latest">
     <div class="site-shell">
       <div class="section-head">
-        <div><h2>{t.latestTitle}</h2><p class="section-note">{t.latestNote}</p></div>
+        <div>
+          <span class="kicker">{t.kickerLatest}</span>
+          <h2>{t.latestTitle}</h2>
+          <p class="section-note">{t.latestNote}</p>
+        </div>
+        <a class="link-arrow" href={dataHref}>{t.viewAll} →</a>
       </div>
       <LatestStrip updates={highlights.latest} locale={locale} />
     </div>
@@ -710,10 +962,18 @@ const path = locale === 'en' ? '/en/' : '/';
 
   <section class="section section-muted" id="features">
     <div class="site-shell">
-      <div class="section-head"><h2>{t.featuresTitle}</h2></div>
+      <div class="section-head">
+        <div>
+          <span class="kicker">{t.kickerFeatures}</span>
+          <h2>{t.featuresTitle}</h2>
+        </div>
+      </div>
       <div class="grid grid-3">
         {highlights.features.map((feature, index) => (
           <article class="card" data-reveal style={`--delay:${index * 70}ms`}>
+            <span class="feature-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d={icons[index % icons.length]} /></svg>
+            </span>
             <h3>{feature.title[locale]}</h3>
             <p class="section-note">{feature.description[locale]}</p>
           </article>
@@ -725,6 +985,7 @@ const path = locale === 'en' ? '/en/' : '/';
   {highlights.faq.length > 0 && (
     <section class="section" id="faq">
       <div class="site-shell faq">
+        <span class="kicker">FAQ</span>
         <h2>{t.faqTitle}</h2>
         {highlights.faq.map((item) => (
           <details>
@@ -735,6 +996,18 @@ const path = locale === 'en' ? '/en/' : '/';
       </div>
     </section>
   )}
+
+  <section class="section" id="cta">
+    <div class="site-shell">
+      <div class="cta-band" data-reveal>
+        <h2>{t.ctaTitle}</h2>
+        <p class="section-note cta-note">{t.ctaNote}</p>
+        <div class="cta-row center">
+          <a class="button button-invert" href={dataHref}>{t.heroAction}</a>
+        </div>
+      </div>
+    </div>
+  </section>
 </BaseLayout>
 """
 
@@ -893,35 +1166,128 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 """
 
 LOGO_SVG = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="__NAME__ logo">
-  <rect x="40" y="40" width="432" height="432" rx="104" fill="#0ea5e9"/>
-  <path d="M150 350 L256 150 L362 350" fill="none" stroke="#fff" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M196 286 H316" fill="none" stroke="#fff" stroke-width="26" stroke-linecap="round"/>
+  <defs>
+    <linearGradient id="badge" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#38bdf8"/>
+      <stop offset="0.55" stop-color="#0ea5e9"/>
+      <stop offset="1" stop-color="#6366f1"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.32" cy="0.26" r="0.95">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.30"/>
+      <stop offset="0.55" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="spark" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#dbeafe"/>
+    </linearGradient>
+  </defs>
+  <rect x="40" y="40" width="432" height="432" rx="104" fill="url(#badge)"/>
+  <rect x="40" y="40" width="432" height="432" rx="104" fill="url(#glow)"/>
+  <rect x="54" y="54" width="404" height="404" rx="92" fill="none" stroke="#ffffff" stroke-opacity="0.22" stroke-width="3"/>
+  <g transform="translate(256 262)">
+    <g transform="rotate(-18)">
+      <ellipse rx="152" ry="56" fill="none" stroke="#ffffff" stroke-opacity="0.55" stroke-width="26"/>
+      <ellipse rx="152" ry="56" fill="none" stroke="#ffffff" stroke-opacity="0.9" stroke-width="12"/>
+      <circle cx="152" cy="0" r="17" fill="#ffffff"/>
+      <circle cx="-152" cy="0" r="11" fill="#ffffff" fill-opacity="0.85"/>
+    </g>
+    <path d="M0 -108 C 15 -36 36 -15 108 0 C 36 15 15 36 0 108 C -15 36 -36 15 -108 0 C -36 -15 -15 -36 0 -108 Z" fill="url(#spark)"/>
+    <circle r="24" fill="#0ea5e9" stroke="#ffffff" stroke-width="7"/>
+  </g>
 </svg>
 """
 
 FAVICON_SVG = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="14" fill="#0ea5e9"/>
-  <path d="M18 45 L32 18 L46 45" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <defs>
+    <linearGradient id="b" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#38bdf8"/>
+      <stop offset="1" stop-color="#6366f1"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="15" fill="url(#b)"/>
+  <ellipse cx="32" cy="33" rx="20" ry="7.6" fill="none" stroke="#ffffff" stroke-opacity="0.85" stroke-width="2.6" transform="rotate(-18 32 33)"/>
+  <path d="M32 12 C 33.7 25.5 35.5 27.3 49 29 C 35.5 30.7 33.7 32.5 32 46 C 30.3 32.5 28.5 30.7 15 29 C 28.5 27.3 30.3 25.5 32 12 Z" fill="#ffffff"/>
+  <circle cx="32" cy="29" r="3.4" fill="#0ea5e9" stroke="#ffffff" stroke-width="1.2"/>
 </svg>
 """
 
 PREVIEW_SVG = """<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 750">
-  <rect width="1200" height="750" fill="#f1f5f9"/>
-  <rect x="72" y="64" width="1056" height="622" rx="28" fill="#ffffff" stroke="#e2e8f0" stroke-width="2"/>
-  <rect x="72" y="64" width="220" height="622" rx="28" fill="#0f172a"/>
-  <circle cx="128" cy="126" r="18" fill="#0ea5e9"/>
-  <rect x="160" y="116" width="90" height="18" rx="9" fill="#334155"/>
-  <rect x="104" y="210" width="156" height="16" rx="8" fill="#334155"/>
-  <rect x="104" y="252" width="120" height="16" rx="8" fill="#334155"/>
-  <rect x="104" y="294" width="140" height="16" rx="8" fill="#334155"/>
-  <rect x="340" y="132" width="360" height="30" rx="10" fill="#0f172a"/>
-  <rect x="340" y="186" width="620" height="18" rx="9" fill="#cbd5e1"/>
-  <rect x="340" y="220" width="500" height="18" rx="9" fill="#e2e8f0"/>
-  <rect x="340" y="300" width="230" height="130" rx="16" fill="#e0f2fe"/>
-  <rect x="594" y="300" width="230" height="130" rx="16" fill="#f1f5f9"/>
-  <rect x="848" y="300" width="230" height="130" rx="16" fill="#f1f5f9"/>
-  <rect x="340" y="480" width="738" height="150" rx="16" fill="#f8fafc" stroke="#e2e8f0" stroke-width="2"/>
-  <text x="600" y="575" text-anchor="middle" font-family="system-ui, sans-serif" font-size="30" fill="#64748b">Replace with a real product screenshot</text>
+  <defs>
+    <linearGradient id="pbrand" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#38bdf8"/><stop offset="1" stop-color="#6366f1"/>
+    </linearGradient>
+    <linearGradient id="parea" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0ea5e9" stop-opacity="0.4"/><stop offset="1" stop-color="#0ea5e9" stop-opacity="0.02"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="750" fill="#f8fafc"/>
+  <rect width="250" height="750" fill="#0f172a"/>
+  <circle cx="52" cy="60" r="16" fill="url(#pbrand)"/>
+  <rect x="80" y="52" width="96" height="16" rx="8" fill="#334155"/>
+  <rect x="36" y="130" width="178" height="40" rx="10" fill="#0ea5e9"/>
+  <rect x="52" y="144" width="86" height="12" rx="6" fill="#ffffff" opacity="0.92"/>
+  <rect x="36" y="186" width="178" height="40" rx="10" fill="#1e293b"/>
+  <rect x="52" y="200" width="104" height="12" rx="6" fill="#64748b"/>
+  <rect x="36" y="242" width="178" height="40" rx="10" fill="#1e293b"/>
+  <rect x="52" y="256" width="76" height="12" rx="6" fill="#64748b"/>
+  <rect x="36" y="298" width="178" height="40" rx="10" fill="#1e293b"/>
+  <rect x="52" y="312" width="112" height="12" rx="6" fill="#64748b"/>
+  <rect x="290" y="50" width="300" height="26" rx="13" fill="#0f172a"/>
+  <rect x="760" y="46" width="240" height="34" rx="17" fill="#ffffff" stroke="#e2e8f0" stroke-width="2"/>
+  <rect x="782" y="58" width="120" height="10" rx="5" fill="#cbd5e1"/>
+  <circle cx="1128" cy="63" r="17" fill="url(#pbrand)"/>
+  <rect x="290" y="120" width="280" height="140" rx="16" fill="#ffffff" stroke="#e2e8f0" stroke-width="2"/>
+  <rect x="314" y="144" width="90" height="12" rx="6" fill="#94a3b8"/>
+  <rect x="314" y="166" width="120" height="26" rx="8" fill="#0f172a"/>
+  <rect x="470" y="166" width="58" height="20" rx="10" fill="#dcfce7"/>
+  <rect x="314" y="214" width="34" height="22" rx="6" fill="#bae6fd"/>
+  <rect x="360" y="204" width="34" height="32" rx="6" fill="#7dd3fc"/>
+  <rect x="406" y="212" width="34" height="24" rx="6" fill="#bae6fd"/>
+  <rect x="452" y="198" width="34" height="38" rx="6" fill="#0ea5e9"/>
+  <rect x="590" y="120" width="280" height="140" rx="16" fill="#ffffff" stroke="#e2e8f0" stroke-width="2"/>
+  <rect x="614" y="144" width="110" height="12" rx="6" fill="#94a3b8"/>
+  <rect x="614" y="166" width="96" height="26" rx="8" fill="#0f172a"/>
+  <rect x="770" y="166" width="58" height="20" rx="10" fill="#dcfce7"/>
+  <rect x="614" y="214" width="34" height="26" rx="6" fill="#bae6fd"/>
+  <rect x="660" y="206" width="34" height="34" rx="6" fill="#0ea5e9"/>
+  <rect x="706" y="216" width="34" height="24" rx="6" fill="#bae6fd"/>
+  <rect x="752" y="200" width="34" height="40" rx="6" fill="#7dd3fc"/>
+  <rect x="890" y="120" width="280" height="140" rx="16" fill="#ffffff" stroke="#e2e8f0" stroke-width="2"/>
+  <rect x="914" y="144" width="100" height="12" rx="6" fill="#94a3b8"/>
+  <rect x="914" y="166" width="132" height="26" rx="8" fill="#0f172a"/>
+  <rect x="914" y="214" width="34" height="20" rx="6" fill="#bae6fd"/>
+  <rect x="960" y="208" width="34" height="26" rx="6" fill="#7dd3fc"/>
+  <rect x="1006" y="204" width="34" height="30" rx="6" fill="#0ea5e9"/>
+  <rect x="1052" y="212" width="34" height="22" rx="6" fill="#bae6fd"/>
+  <rect x="290" y="290" width="560" height="240" rx="16" fill="#ffffff" stroke="#e2e8f0" stroke-width="2"/>
+  <rect x="314" y="314" width="140" height="14" rx="7" fill="#94a3b8"/>
+  <path d="M314 470 L314 428 C360 418 384 382 434 374 C484 366 506 400 556 390 C606 380 634 344 684 340 C734 336 764 360 826 352 L826 470 Z" fill="url(#parea)"/>
+  <path d="M314 428 C360 418 384 382 434 374 C484 366 506 400 556 390 C606 380 634 344 684 340 C734 336 764 360 826 352" fill="none" stroke="#0ea5e9" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="434" cy="374" r="5" fill="#ffffff" stroke="#0ea5e9" stroke-width="3"/>
+  <circle cx="684" cy="340" r="5" fill="#ffffff" stroke="#0ea5e9" stroke-width="3"/>
+  <rect x="870" y="290" width="300" height="240" rx="16" fill="#ffffff" stroke="#e2e8f0" stroke-width="2"/>
+  <rect x="894" y="314" width="120" height="14" rx="7" fill="#94a3b8"/>
+  <circle cx="908" cy="366" r="12" fill="url(#pbrand)"/>
+  <rect x="932" y="356" width="150" height="10" rx="5" fill="#cbd5e1"/>
+  <rect x="932" y="372" width="96" height="8" rx="4" fill="#e2e8f0"/>
+  <circle cx="908" cy="416" r="12" fill="url(#pbrand)"/>
+  <rect x="932" y="406" width="180" height="10" rx="5" fill="#cbd5e1"/>
+  <rect x="932" y="422" width="120" height="8" rx="4" fill="#e2e8f0"/>
+  <circle cx="908" cy="466" r="12" fill="url(#pbrand)"/>
+  <rect x="932" y="456" width="140" height="10" rx="5" fill="#cbd5e1"/>
+  <rect x="932" y="472" width="110" height="8" rx="4" fill="#e2e8f0"/>
+  <rect x="290" y="550" width="880" height="150" rx="16" fill="#ffffff" stroke="#e2e8f0" stroke-width="2"/>
+  <rect x="314" y="574" width="180" height="14" rx="7" fill="#0f172a"/>
+  <rect x="314" y="606" width="220" height="10" rx="5" fill="#cbd5e1"/>
+  <rect x="314" y="636" width="180" height="10" rx="5" fill="#e2e8f0"/>
+  <rect x="314" y="666" width="200" height="10" rx="5" fill="#e2e8f0"/>
+  <rect x="600" y="604" width="90" height="20" rx="10" fill="#dcfce7"/>
+  <rect x="600" y="640" width="90" height="20" rx="10" fill="#fef9c3"/>
+  <rect x="760" y="604" width="70" height="14" rx="7" fill="#0f172a"/>
+  <rect x="760" y="640" width="56" height="14" rx="7" fill="#334155"/>
+  <rect x="980" y="604" width="160" height="14" rx="7" fill="#e2e8f0"/>
+  <rect x="980" y="640" width="130" height="14" rx="7" fill="#e2e8f0"/>
+  <text x="1164" y="726" text-anchor="end" font-family="system-ui, sans-serif" font-size="15" fill="#94a3b8">Illustrative preview — replace with a real screenshot</text>
 </svg>
 """
 
@@ -1097,6 +1463,8 @@ def main() -> int:
     files["README.md"] = readme
 
     for relative, content in files.items():
+        if "{{" in content.replace("${{", ""):
+            print(f"warning: unresolved placeholder in {relative}", file=sys.stderr)
         write_file(target, relative, content)
 
     copy_asset(target, "tokens.css", "src/styles/tokens.css")

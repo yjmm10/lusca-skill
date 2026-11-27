@@ -1,0 +1,40 @@
+{
+  "expectations": [
+    {
+      "text": "Project has landing, data, about and /en/ page files",
+      "passed": true,
+      "evidence": "html files: ['about.html', 'data.html', 'en/about.html', 'en/data.html', 'en/index.html', 'index.html']"
+    },
+    {
+      "text": "product.json and derived highlights.json both exist",
+      "passed": false,
+      "evidence": "product.json=0, highlights.json=0; baseline splits data into metrics.json/news.json without single-source highlights"
+    },
+    {
+      "text": "Theme tokens and zh/en dictionaries are present",
+      "passed": true,
+      "evidence": "token declarations in 1 files; zh-keyed bilingual data in 2 files"
+    },
+    {
+      "text": "SEO/GEO files include canonical, hreflang, sitemap and llms.txt",
+      "passed": false,
+      "evidence": "canonical=False, hreflang=True, sitemap=False, llms.txt=False"
+    },
+    {
+      "text": "SVG and PNG logo plus GitHub Pages workflow exist",
+      "passed": false,
+      "evidence": "svg=True, png=False, gh workflow=True"
+    },
+    {
+      "text": "README and a screenshot plan are present",
+      "passed": true,
+      "evidence": "README.md=True, screenshot plan=True"
+    }
+  ],
+  "summary": {
+    "passed": 3,
+    "failed": 3,
+    "total": 6,
+    "pass_rate": 0.5
+  }
+}

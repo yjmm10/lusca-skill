@@ -2,6 +2,10 @@
 
 目标：选到与产品数据匹配、维护可靠、能融入深浅主题和中英文的组件，而不是堆一个流行库。
 
+## 已知官方口径（2025 起）
+
+- Astro 官方已弃用 `@astrojs/tailwind` 集成，推荐 Tailwind v4 + `@tailwindcss/vite` 插件（来源：docs.astro.build/en/guides/integrations-guide/tailwind、github.com/withastro/astro CHANGELOG 6.0.0）。生成项目时用 v4 路径，不引入弃用集成。
+
 ## 检索步骤
 
 1. 先看数据形态：指标卡、表格、筛选、图表、画廊、FAQ、代码预览分别需要什么组件。
