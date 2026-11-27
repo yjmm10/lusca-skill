@@ -114,6 +114,9 @@ def skill_source_dirs():
                 yield skill_dir.name, skill_dir
 
 
+JUNK_IGNORE = shutil.ignore_patterns("__pycache__", "*.pyc", ".DS_Store")
+
+
 def sync_plugin() -> int:
     """把 skills/ 实体拷贝为 plugin/skills/<name>/（Claude Code plugin marketplace 分发拷贝），并清理残留。"""
     out = PLUGIN_DIR / "skills"
@@ -121,7 +124,14 @@ def sync_plugin() -> int:
     valid = set()
     count = 0
     for name, src in skill_source_dirs():
-        shutil.copytree(src, out / name, dirs_exist_ok=True)
+        dst = out / name
+        shutil.copytree(src, dst, dirs_exist_ok=True, ignore=JUNK_IGNORE)
+        # 清理拷贝侧残留的编译产物 / 系统文件（含历史已提交的）
+        for p in sorted(dst.rglob("*"), reverse=True):
+            if p.is_dir() and p.name == "__pycache__":
+                shutil.rmtree(p)
+            elif p.is_file() and (p.suffix == ".pyc" or p.name == ".DS_Store"):
+                p.unlink()
         valid.add(name)
         count += 1
     for child in list(out.iterdir()):
@@ -148,7 +158,7 @@ def plugin_is_fresh() -> tuple[bool, str]:
         return {
             str(p.relative_to(root)).replace("\\", "/"): p
             for p in sorted(root.rglob("*"))
-            if p.is_file()
+            if p.is_file() and "__pycache__" not in p.parts and p.suffix != ".pyc" and p.name != ".DS_Store"
         }
 
     for name, src in skill_source_dirs():
