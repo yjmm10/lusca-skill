@@ -3,6 +3,7 @@
 
 Usage:
   python capture_screenshots.py TARGET_DIR --url http://localhost:4321
+  python capture_screenshots.py TARGET_DIR --check   # 只探测 Playwright 是否可用（exit 0 可用 / 3 未装，附安装提示）
 """
 
 from __future__ import annotations
@@ -34,6 +35,36 @@ PAGE_LABELS = {
 }
 
 
+def _resolve_playwright(root: Path) -> tuple[Path | None, Path | None]:
+    """返回 (node_exe, playwright_cli)；项目本地安装优先。用 node 直跑 cli，绕开 npx.cmd 在 Windows 上的挂起问题。"""
+    node = shutil.which("node")
+    if node is None:
+        return None, None
+    cli = root / "node_modules" / "playwright" / "cli.js"
+    if cli.is_file():
+        return Path(node), cli
+    return Path(node), None
+
+
+def playwright_ready(root: Path) -> tuple[bool, str]:
+    """探测 node 与项目本地 Playwright 是否就绪。"""
+    node, cli = _resolve_playwright(root)
+    if node is None:
+        return False, "node 不可用（需先装 Node.js）"
+    if cli is None:
+        return False, "Playwright 未安装——在项目里执行 npm i -D playwright && npx playwright install chromium"
+    try:
+        probe = subprocess.run(
+            [str(node), str(cli), "--version"],
+            capture_output=True, text=True, timeout=60,
+        )
+    except (OSError, subprocess.TimeoutExpired) as exc:
+        return False, f"探测 Playwright 失败：{exc}"
+    if probe.returncode != 0:
+        return False, "Playwright 安装异常——重试 npm i -D playwright && npx playwright install chromium"
+    return True, probe.stdout.strip() or "playwright"
+
+
 def build_url(base: str, locale: str, page: str, theme: str) -> str:
     prefix = "" if locale == "zh" else "en/"
     path = f"{prefix}{PAGE_PATHS[page]}"
@@ -51,13 +82,21 @@ def main() -> int:
     parser.add_argument("--pages", default="landing,data,about")
     parser.add_argument("--viewport", default="1440,900")
     parser.add_argument("--mobile", action="store_true", help="Use 390,844 viewport and suffix names with -mobile")
+    parser.add_argument("--check", action="store_true", help="Only probe Playwright availability; never capture")
     args = parser.parse_args()
 
-    if shutil.which("npx") is None:
-        print("error: npx is not available; install Playwright and capture screenshots manually", file=sys.stderr)
-        return 2
-
     root = args.target.expanduser().resolve()
+
+    ready, detail = playwright_ready(root)
+    if args.check:
+        print(("ready: " if ready else "missing: ") + detail)
+        return 0 if ready else 3
+    if not ready:
+        print("error: " + detail, file=sys.stderr)
+        print("hint: 经用户确认安装后再重试；用户选择不安装时改用 validate_site.py --skip-screenshots 跳过截图", file=sys.stderr)
+        return 3
+
+    node, cli = _resolve_playwright(root)
     out_dir = root / args.out
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -75,12 +114,12 @@ def main() -> int:
                 destination = out_dir / filename
                 url = build_url(args.url, locale, page, theme)
                 command = [
-                    "npx",
-                    "playwright",
+                    str(node),
+                    str(cli),
                     "screenshot",
                     f"--viewport-size={viewport}",
                     "--full-page",
-                    "--wait-for-timeout=800",
+                    "--wait-for-timeout=1800",
                     url,
                     str(destination),
                 ]

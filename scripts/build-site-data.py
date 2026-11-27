@@ -125,8 +125,10 @@ def sync_plugin() -> int:
     count = 0
     for name, src in skill_source_dirs():
         dst = out / name
-        shutil.copytree(src, dst, dirs_exist_ok=True, ignore=JUNK_IGNORE)
-        # 清理拷贝侧残留的编译产物 / 系统文件（含历史已提交的）
+        if dst.exists():
+            shutil.rmtree(dst)  # 净拷贝：源侧删除的文件同步从拷贝侧移除
+        shutil.copytree(src, dst, ignore=JUNK_IGNORE)
+        # 清理拷贝侧残留的编译产物 / 系统文件
         for p in sorted(dst.rglob("*"), reverse=True):
             if p.is_dir() and p.name == "__pycache__":
                 shutil.rmtree(p)
