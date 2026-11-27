@@ -73,7 +73,7 @@ skill 执行过程**少生成中间信息、省 token**；产出文档本身该�
 
 - 优先在**仓库根**启动 cc，以加载项目级 `.claude/skills/`
 - 反省产出归 `./outputs/lucas/`（gitignored，见 `skills/meta/lucas`）
-- 官网源在 `site/`（纯静态，Pages 自动部署）：改 skill 后跑 `python scripts/build-site-data.py` 刷新站点数据；CI 部署时也会自动重生成
+- 官网源在 `site/`（纯静态，Pages 自动部署）：改 skill 后跑 `python scripts/build-site-data.py` 同步站点数据与 `plugin/` 分发拷贝；CI 部署前校验 plugin 拷贝过期即失败
 - 工作区设计规范见 `docs/superpowers/specs/`
 
 ## 本阶段不做

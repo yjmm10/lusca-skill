@@ -61,30 +61,39 @@
     <div class="cat-grid" id="cat-grid"><!-- JS 填充 --></div>
 
     <div class="howto">
-      <h2 class="section-title" style="margin-top:0">快速上手：安装与挂载</h2>
-      <p class="howto-prereq">前置：已安装 <strong>Claude Code（cc）</strong> 或 <strong>pi</strong>；git 与 bash（Windows 用 Git Bash / WSL）。</p>
-      <ol>
-        <li>
-          <p><strong>克隆仓库</strong></p>
-          <pre class="code-block">git clone https://github.com/yjmm10/lusca-skill
-cd lusca-skill</pre>
-        </li>
-        <li>
-          <p><strong>挂载发现层</strong>（按需选一或叠加，均幂等可重复跑）</p>
-          <pre class="code-block">./scripts/link-project.sh   # 仅本仓库目录内可用（项目级 .claude/skills/）
-./scripts/link-global.sh    # 任意目录开 cc 都可用（~/.claude/skills/）
-./scripts/link-pi.sh        # pi 一次性注册，之后新增 skill 自动发现</pre>
-        </li>
-        <li>
-          <p><strong>新开会话验证</strong>：重开 cc / pi，输入斜杠指令 <code>/lucas-paper-search</code> 或直接说「帮我精读这篇论文」——能触发即安装成功。</p>
-        </li>
-        <li>
-          <p><strong>日常更新</strong></p>
-          <pre class="code-block">git pull &amp;&amp; ./scripts/link-project.sh   # 新增/删除 skill 目录后重建链接
-# 只改 SKILL.md 正文：无需重跑，新开会话即生效</pre>
-        </li>
-      </ol>
-      <p class="howto-note">三条 link 脚本只建符号链接、不改内容；遇实体目录冲突会报错不覆盖（<code>--dry-run</code> 可预览）。</p>
+      <h2 class="section-title" style="margin-top:0">安装与使用</h2>
+      <p class="howto-prereq">前置：Claude Code（cc）或 pi；git。按场景四选一，都不用改本仓库内容。</p>
+
+      <div class="method">
+        <h3 class="method-title"><span class="method-tag">推荐</span>一键安装（cc · 实体拷贝，无软链）</h3>
+        <pre class="code-block"># 全部安装（macOS / Linux / Windows Git Bash 通用）
+curl -fsSL https://raw.githubusercontent.com/yjmm10/lusca-skill/main/scripts/install.sh | bash
+
+# 只装想要的（空格分隔名字）
+curl -fsSL https://raw.githubusercontent.com/yjmm10/lusca-skill/main/scripts/install.sh | bash -s -- lucas-paper-read lucas-paper-blog</pre>
+        <p class="method-note">装到 <code>~/.claude/skills/</code>，所有项目可用；重复运行即整目录更新。</p>
+      </div>
+
+      <div class="method">
+        <h3 class="method-title">Plugin marketplace（cc 官方分发渠道 · 可版本管理）</h3>
+        <pre class="code-block">/plugin marketplace add yjmm10/lusca-skill
+/plugin install lucas-skills@lucas-skill</pre>
+        <p class="method-note">指令带插件前缀（如 <code>/lucas-skills:lucas-paper-read</code>）；按 description 自动触发不受影响，<code>/plugin</code> 面板里可随时升级/卸载。</p>
+      </div>
+
+      <div class="method">
+        <h3 class="method-title">pi 用户</h3>
+        <pre class="code-block">git clone https://github.com/yjmm10/lusca-skill &amp;&amp; cd lusca-skill
+./scripts/link-pi.sh   # 一次性注册，之后新增 skill 自动发现（仅 pi 内 /reload 生效）</pre>
+      </div>
+
+      <div class="method">
+        <h3 class="method-title"><span class="method-tag ghost">维护者</span>克隆 + 软链（单一源开发，改一处处处最新）</h3>
+        <pre class="code-block">git clone https://github.com/yjmm10/lusca-skill &amp;&amp; cd lusca-skill
+./scripts/link-project.sh   # 仅本仓库内可用（项目级 .claude/skills/）
+./scripts/link-global.sh    # 任意目录开 cc 都可用（~/.claude/skills/）</pre>
+        <p class="method-note">软链在 Windows 需开发者模式或 WSL——只想用 skill 请选上面的一键安装；脚本幂等，遇实体冲突报错不覆盖（<code>--dry-run</code> 预览）。只改 SKILL.md 正文无需重跑，新开会话即生效。</p>
+      </div>
     </div>
   </section>
 

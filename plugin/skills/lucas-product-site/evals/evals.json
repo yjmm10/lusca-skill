@@ -1,0 +1,47 @@
+{
+  "skill_name": "lucas-product-site",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "帮我给一个叫 Aether 的开发者工具做静态产品官网。要有落地页、数据页和关于页，落地页展示最新动态和核心指标，数据页放完整数据，关于页写清楚产品、作者和免责声明。数据用本地 JSON，默认中英文、支持深浅主题和跟随系统，部署到 GitHub Pages。请给出项目结构、关键代码、logo 方案和截图计划。",
+      "expected_output": "一个 Astro + TS + Tailwind 项目骨架，三页齐全，数据单一源，中英文与主题完整，含 SEO/GEO、logo SVG/PNG、README、截图与验证结果。",
+      "files": [],
+      "expectations": [
+        "Project has landing, data, about and /en/ page files",
+        "product.json and derived highlights.json both exist",
+        "Theme tokens and zh/en dictionaries are present",
+        "SEO/GEO files include canonical, hreflang, sitemap and llms.txt",
+        "SVG and PNG logo plus GitHub Pages workflow exist",
+        "README and a screenshot plan are present"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "我们有一个产品数据 API，想做产品站但不想编造任何指标。请把 assets/product.example.json 当成数据样本，先归一成统一 schema，再让落地页只展示数据页里的关键信息。顺便调研适合这个数据规模的 UI 组件，并把依据写进文档。",
+      "expected_output": "归一后的 product.json/highlights.json、可追溯的数据字段、组件调研记录，以及落地页从数据派生的实现。",
+      "files": [
+        "assets/product.example.json"
+      ],
+      "expectations": [
+        "Example product data is copied and normalized to the required schema",
+        "Derived highlights contain no metric values absent from the source data",
+        "Landing page reads derived highlights instead of hardcoding metric values",
+        "UI decision document cites at least 3 sources and states a tradeoff",
+        "Data page displays source and period for metrics"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "给一款面向设计师的 AI 工具做产品站，名字想叫 Hephaestus 但太长。帮我换成更短、好听、有文化意象的名字，配一个相符的 logo，并做中文落地页和英文 /en/ 页面。要求专业权威，不要太花哨，还要有利于搜索引擎和 AI 引用。",
+      "expected_output": "短名候选与确认流程、语义一致的 logo、zh/en 三页、结构化 SEO/GEO 文件，以及性能与缓存策略。",
+      "files": [],
+      "expectations": [
+        "At least 3 short name candidates and one recommendation are documented",
+        "Logo SVG and PNG exist and the brand doc explains their concept",
+        "Chinese landing page and English /en/ landing page both exist",
+        "SEO/GEO includes canonical, hreflang, JSON-LD and llms.txt",
+        "Performance or cache configuration is present"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "name": "lucas-skill",
+  "description": "lucas-skill 多 Skill 工作区：论文科研 / 写作发布 / 调研 / 工程脚手架全流程技能包",
+  "owner": {
+    "name": "Lucas (yjmm10)",
+    "url": "https://yjmm10.github.io"
+  },
+  "plugins": [
+    {
+      "name": "lucas-skills",
+      "source": "./plugin",
+      "description": "16 个 Claude Code skill：文献检索、PDF 解析、精读、润色、LaTeX、博客化、事件调研、脚手架等"
+    }
+  ]
+}

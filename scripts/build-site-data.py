@@ -1,18 +1,20 @@
 #!/usr/bin/env python3
-"""生成官网站点数据：扫描 skills/*/*/SKILL.md frontmatter → site/data/skills.json，
-并把仓库根 assets/ 的 logo 同步拷贝进 site/assets/（Pages artifact 不允许 symlink，用真实拷贝）。
+"""同步工作区分发产物：扫描 skills/*/*/SKILL.md →
+  1) site/data/skills.json（官网数据）
+  2) site/assets/（logo 同步拷贝，Pages artifact 不允许 symlink）
+  3) plugin/skills/<name>/（Claude Code plugin marketplace 分发拷贝，实体目录）
 
 用法：
-    python scripts/build-site-data.py            # 生成数据 + 同步 logo
-    python scripts/build-site-data.py --check    # 仅校验数据是否为最新（CI 用）
+    python scripts/build-site-data.py            # 同步全部产物
+    python scripts/build-site-data.py --check    # 仅校验 plugin 拷贝是否与 skills/ 单一源一致（CI 门禁）
 
-CI（.github/workflows/deploy.yml）在部署前会自动重跑本脚本，保证站点数据与 skills/ 单一源一致；
-本地改完 skill 后手动跑一次即可预览最新效果。
+CI（.github/workflows/deploy.yml）部署前先 --check 再同步；本地改完 skill 后跑一次即可。
 """
 
 from __future__ import annotations
 
 import argparse
+import filecmp
 import json
 import re
 import shutil
@@ -24,6 +26,7 @@ REPO = Path(__file__).resolve().parent.parent
 SKILLS_DIR = REPO / "skills"
 SITE = REPO / "site"
 DATA_FILE = SITE / "data" / "skills.json"
+PLUGIN_DIR = REPO / "plugin"
 
 try:
     import yaml  # noqa: F401  有 pyyaml 用标准解析
@@ -100,6 +103,59 @@ def sync_logo() -> None:
             shutil.copyfile(src, out / fname)
 
 
+def skill_source_dirs():
+    """产出 (name, Path)：全部含 SKILL.md 的 skill 目录。"""
+    for meta in CATEGORIES:
+        cat_dir = SKILLS_DIR / meta["id"]
+        if not cat_dir.is_dir():
+            continue
+        for skill_dir in sorted(p for p in cat_dir.iterdir() if p.is_dir()):
+            if (skill_dir / "SKILL.md").is_file():
+                yield skill_dir.name, skill_dir
+
+
+def sync_plugin() -> int:
+    """把 skills/ 实体拷贝为 plugin/skills/<name>/（Claude Code plugin marketplace 分发拷贝），并清理残留。"""
+    out = PLUGIN_DIR / "skills"
+    out.mkdir(parents=True, exist_ok=True)
+    valid = set()
+    count = 0
+    for name, src in skill_source_dirs():
+        shutil.copytree(src, out / name, dirs_exist_ok=True)
+        valid.add(name)
+        count += 1
+    for child in list(out.iterdir()):
+        if child.name not in valid:
+            shutil.rmtree(child) if child.is_dir() else child.unlink()
+    return count
+
+
+def plugin_is_fresh() -> tuple[bool, str]:
+    """校验 plugin/skills/ 拷贝与 skills/ 单一源逐文件一致（内容级比较，不依赖 mtime）。"""
+    names = {name for name, _ in skill_source_dirs()}
+    out = PLUGIN_DIR / "skills"
+    if not out.is_dir():
+        return False, "plugin/skills/ 不存在，需先同步"
+    stale = [n for n in names if not (out / n).is_dir()]
+    extra = [p.name for p in out.iterdir() if p.name not in names]
+    if stale or extra:
+        return False, f"目录不一致（缺：{stale}；多：{extra}）"
+    for name, src in skill_source_dirs():
+        cmp = filecmp.dircmp(src, out / name)
+        _, mismatch, errors = filecmp.cmpfiles(
+            src, out / name,
+            [f for f in cmp.left_list if (src / f).is_file()],
+            shallow=False,
+        )
+        if mismatch or errors:
+            return False, f"{name} 内容不一致（mismatch={mismatch}，errors={errors}）"
+        # 递归子目录
+        for sub in cmp.subdirs.values():
+            if sub.left_only or sub.right_only or sub.funny_files:
+                return False, f"{name}/{sub.name} 子目录不一致"
+    return True, ""
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--check", action="store_true", help="仅校验生成结果与现有文件一致")
@@ -113,15 +169,21 @@ def main() -> int:
     payload = json.dumps(data, ensure_ascii=False, indent=2) + "\n"
 
     if args.check:
-        ok = DATA_FILE.is_file() and DATA_FILE.read_text(encoding="utf-8") == payload
-        print("site 数据已是最新" if ok else "site 数据过期，需要重新生成")
-        return 0 if ok else 1
+        ok, reason = plugin_is_fresh()
+        if ok:
+            print("plugin 拷贝与 skills/ 单一源一致")
+            return 0
+        print(f"plugin 拷贝过期：{reason}", file=sys.stderr)
+        print("本地运行 python scripts/build-site-data.py 后提交，再触发部署", file=sys.stderr)
+        return 1
 
     DATA_FILE.parent.mkdir(parents=True, exist_ok=True)
     DATA_FILE.write_text(payload, encoding="utf-8")
     sync_logo()
+    n_plugin = sync_plugin()
     print(f"已生成 {DATA_FILE.relative_to(REPO)}（{data['stats']['total']} 个 skill / {data['stats']['categories']} 类）")
     print(f"logo 已同步 → {SITE.relative_to(REPO)}/assets/")
+    print(f"plugin 分发拷贝已同步 → plugin/skills/（{n_plugin} 个）")
     return 0
 
 

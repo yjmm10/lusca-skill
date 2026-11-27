@@ -1,0 +1,11 @@
+{
+  "name": "lucas-skills",
+  "version": "1.0.0",
+  "description": "lucas-skill 全家桶：文献检索 → PDF 解析 → 精读 → 润色 → LaTeX → 海报，论文/报告博客化，事件调研，项目脚手架与产品官网。技能指令带插件前缀（/lucas-skills:<skill-name>），按 description 自动触发不受影响。",
+  "author": {
+    "name": "Lucas (yjmm10)",
+    "url": "https://yjmm10.github.io"
+  },
+  "homepage": "https://yjmm10.github.io/lusca-skill/",
+  "repository": "https://github.com/yjmm10/lusca-skill"
+}

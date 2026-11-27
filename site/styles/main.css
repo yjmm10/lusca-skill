@@ -123,6 +123,15 @@ main { padding: var(--space-6) 0 var(--space-8); min-height: calc(100vh - 130px)
 }
 .howto-prereq { margin: 0 0 var(--space-2); font-size: var(--text-sm); color: var(--color-text-muted); }
 .howto-note { font-size: var(--text-xs); color: var(--color-text-faint); margin-top: var(--space-3); }
+.method { margin-top: var(--space-5); }
+.method-title { font-size: var(--text-sm); font-weight: 800; margin: 0 0 var(--space-2); color: var(--color-text); }
+.method-tag {
+  display: inline-block; font-size: var(--text-xs); font-weight: 700;
+  background: var(--color-primary); color: var(--porcelain);
+  border-radius: var(--radius-full); padding: 1px 10px; margin-right: var(--space-2); vertical-align: 1px;
+}
+.method-tag.ghost { background: var(--color-bg); color: var(--color-text-faint); border: 1px solid var(--color-border); }
+.method-note { font-size: var(--text-xs); color: var(--color-text-faint); margin: var(--space-2) 0 0; }
 .howto code {
   font-family: var(--font-mono); font-size: var(--text-xs);
   background: var(--color-bg); border: 1px solid var(--color-border-soft);

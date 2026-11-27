@@ -27,6 +27,34 @@ lucas-skill/
 └── docs/superpowers/specs/ # 工作区设计规范
 ```
 
+## 安装与使用
+
+按场景四选一（详见[官网首页](https://yjmm10.github.io/lusca-skill/)）：
+
+```bash
+# ① 推荐一键安装（cc，实体拷贝，重跑即更新）
+curl -fsSL https://raw.githubusercontent.com/yjmm10/lusca-skill/main/scripts/install.sh | bash
+```
+
+```text
+# ② Plugin marketplace（cc 官方渠道，指令带前缀 /lucas-skills:<skill-name>）
+/plugin marketplace add yjmm10/lusca-skill
+/plugin install lucas-skills@lucas-skill
+```
+
+```bash
+# ③ pi 用户（一次性注册，之后新增 skill 自动发现）
+git clone https://github.com/yjmm10/lusca-skill && cd lusca-skill && ./scripts/link-pi.sh
+```
+
+```bash
+# ④ 维护者：克隆 + 软链（单一源开发，Windows 需开发者模式或 WSL）
+git clone https://github.com/yjmm10/lusca-skill && cd lusca-skill
+./scripts/link-project.sh   # 或 link-global.sh 全局可用
+```
+
+改 skill 后同步分发产物：`python scripts/build-site-data.py`（刷新官网数据 + `plugin/` 分发拷贝；CI 部署前校验 plugin 拷贝过期即失败）。
+
 ## 官网（GitHub Pages）
 
 - **访问地址**：<https://yjmm10.github.io/lusca-skill/>，三个固定标签：落地页 / Skills / 关于（hash 切换，刷新不 404）

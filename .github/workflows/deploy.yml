@@ -26,6 +26,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # 门禁：plugin/skills/ 分发拷贝必须与 skills/ 单一源一致，过期则部署失败（本地跑 build-site-data.py 后提交）
+      - name: Check plugin dist freshness
+        run: python scripts/build-site-data.py --check
+
       # 重新生成 site/data/skills.json（扫描 skills/ frontmatter），站点永远与单一源同步
       - name: Generate site data
         run: python scripts/build-site-data.py
