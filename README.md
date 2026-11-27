@@ -43,8 +43,10 @@ curl -fsSL https://raw.githubusercontent.com/yjmm10/lusca-skill/main/scripts/ins
 ```
 
 ```bash
-# ③ pi 用户（一次性注册，之后新增 skill 自动发现）
-git clone https://github.com/yjmm10/lusca-skill && cd lusca-skill && ./scripts/link-pi.sh
+# ③ pi（一条命令；启动时自动对齐远端 main，更新无感）
+pi install git:github.com/yjmm10/lusca-skill
+#   本地开发试用：pi -e /path/to/lusca-skill
+#   已用 link-pi.sh 注册过的机器不要再装，同名 skill 会双重加载
 ```
 
 ```bash

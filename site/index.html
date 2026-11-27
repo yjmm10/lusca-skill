@@ -82,9 +82,9 @@ curl -fsSL https://raw.githubusercontent.com/yjmm10/lusca-skill/main/scripts/ins
       </div>
 
       <div class="method">
-        <h3 class="method-title">pi 用户</h3>
-        <pre class="code-block">git clone https://github.com/yjmm10/lusca-skill &amp;&amp; cd lusca-skill
-./scripts/link-pi.sh   # 一次性注册，之后新增 skill 自动发现（仅 pi 内 /reload 生效）</pre>
+        <h3 class="method-title">pi</h3>
+        <pre class="code-block">pi install git:github.com/yjmm10/lusca-skill</pre>
+        <p class="method-note">一条命令装好；pi 启动时自动对齐远端 main，更新无感。本地开发试用：<code>pi -e /path/to/lusca-skill</code>。注意：已用 <code>link-pi.sh</code> 注册过的机器不要再装，同名 skill 会双重加载。</p>
       </div>
 
       <div class="method">

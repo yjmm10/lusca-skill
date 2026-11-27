@@ -1,0 +1,9 @@
+{
+  "name": "lucas-skill",
+  "version": "1.0.0",
+  "description": "lucas-skill 多 Skill 工作区：论文科研 / 写作发布 / 调研 / 工程脚手架全流程技能包",
+  "keywords": ["pi-package"],
+  "pi": {
+    "skills": ["./skills"]
+  }
+}
